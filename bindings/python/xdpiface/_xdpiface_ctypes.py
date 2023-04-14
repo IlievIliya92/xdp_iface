@@ -60,6 +60,8 @@ lib.xdp_iface_load_program.restype = c_int
 lib.xdp_iface_load_program.argtypes = [xdp_iface_p, c_char_p]
 lib.xdp_iface_unload_program.restype = None
 lib.xdp_iface_unload_program.argtypes = [xdp_iface_p]
+lib.xdp_iface_get_name.restype = c_char_p
+lib.xdp_iface_get_name.argtypes = [xdp_iface_p]
 lib.xdp_iface_test.restype = None
 lib.xdp_iface_test.argtypes = [c_bool]
 
@@ -123,6 +125,12 @@ class XdpIface(object):
         Unload compiled XDP BPF object
         """
         return lib.xdp_iface_unload_program(self._as_parameter_)
+
+    def get_name(self):
+        """
+        Retrive xdp interface name
+        """
+        return lib.xdp_iface_get_name(self._as_parameter_)
 
     @staticmethod
     def test(verbose):

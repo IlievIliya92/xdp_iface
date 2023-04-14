@@ -20,4 +20,10 @@
     <method name = "unload_program">
     Unload compiled XDP BPF object
     </method>
+
+    <method name = "get_name">
+    Retrive xdp interface name
+        <return type="string"/>
+    </method>
+
 </class>

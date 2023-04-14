@@ -124,12 +124,18 @@ xdp_iface_load_program(xdp_iface_t *self, const char *xdp_prog_path)
     return err;
 }
 
-void xdp_iface_unload_program(xdp_iface_t *self)
+void
+xdp_iface_unload_program(xdp_iface_t *self)
 {
     xdp_program__detach(self->xdp_prog, self->ifindex, self->attach_mode, 0);
     xdp_program__close(self->xdp_prog);
 }
 
+const char *
+xdp_iface_get_name (xdp_iface_t *self)
+{
+    return self->interface;
+}
 
 //  --------------------------------------------------------------------------
 //  Self test of this class
