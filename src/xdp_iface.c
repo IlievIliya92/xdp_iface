@@ -32,28 +32,31 @@
 @end
 */
 
+/******************************** INCLUDE FILES *******************************/
 #include <net/if.h>
-
-#include <xdp/xsk.h>
 #include <xdp/libxdp.h>
-
-#include <bpf/libbpf.h>
-#include <bpf/bpf.h>
 
 #include "xdpiface_classes.h"
 
+/******************************** LOCAL DEFINES *******************************/
+#define XDP_IFACE_STRERR_BUFSIZE          1024
 
-#define STRERR_BUFSIZE          1024
+/********************************* TYPEDEFS ***********************************/
+
 //  Structure of xdp_iface class
-
 struct _xdp_iface_t {
     int ifindex;
+    char *interface;
 
     enum xdp_attach_mode attach_mode;
     struct xdp_program *xdp_prog;
 };
 
+/********************************* LOCAL DATA *********************************/
 
+/******************************* LOCAL FUNCTIONS ******************************/
+
+/***************************** INTERFACE FUNCTIONS ****************************/
 //  --------------------------------------------------------------------------
 //  Create a new xdp_iface
 
@@ -72,6 +75,7 @@ xdp_iface_new (const char *interface)
         free(self);
         return NULL;
     }
+    self->interface = strdup(interface);
 
     /* Currently only skb mode is supported */
     self->attach_mode = XDP_MODE_SKB;
@@ -90,6 +94,7 @@ xdp_iface_destroy (xdp_iface_t **self_p)
     if (*self_p) {
         xdp_iface_t *self = *self_p;
         //  Free class properties here
+        free(self->interface);
         //  Free object itself
         free (self);
         *self_p = NULL;
@@ -99,7 +104,7 @@ xdp_iface_destroy (xdp_iface_t **self_p)
 int
 xdp_iface_load_program(xdp_iface_t *self, const char *xdp_prog_path)
 {
-    char errmsg[STRERR_BUFSIZE];
+    char errmsg[XDP_IFACE_STRERR_BUFSIZE];
     int err = 0;
 
     self->xdp_prog = xdp_program__open_file(xdp_prog_path, NULL, NULL);
@@ -155,6 +160,7 @@ xdp_iface_test (bool verbose)
     //  Simple create/destroy test
     xdp_iface_t *self = xdp_iface_new (XDP_IFACE_DEFAULT);
     assert (self);
+
     ret = xdp_iface_load_program(self, xdp_prog_path);
     if (0 != ret) {
         fprintf(stderr, "Failed to load program (%s)!", xdp_prog_path);
