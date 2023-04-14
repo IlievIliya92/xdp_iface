@@ -11,9 +11,13 @@
     <destructor>
     </destructor>
 
-    <method name = "load_xdp">
-    Shout once!
-        <argument name="xdp_program_file" type="string">Path to the compiled XDP BPF object</argument>
+    <method name = "load_program">
+    Load compiled XDP BPF object
+        <argument name="xdp_prog_path" type="string">Path to the compiled XDP BPF object</argument>
         <return type="integer"/>
+    </method>
+
+    <method name = "unload_program">
+    Unload compiled XDP BPF object
     </method>
 </class>

@@ -42,9 +42,14 @@
 
 #include "xdpiface_classes.h"
 
+
+#define STRERR_BUFSIZE          1024
 //  Structure of xdp_iface class
 
 struct _xdp_iface_t {
+    int ifindex;
+
+    enum xdp_attach_mode attach_mode;
     struct xdp_program *xdp_prog;
 };
 
@@ -55,9 +60,22 @@ struct _xdp_iface_t {
 xdp_iface_t *
 xdp_iface_new (const char *interface)
 {
+    assert(interface);
+
     xdp_iface_t *self = (xdp_iface_t *) zmalloc (sizeof (xdp_iface_t));
     assert (self);
+
     //  Initialize class properties here
+    self->ifindex = if_nametoindex(interface);
+    if (!self->ifindex) {
+        fprintf(stderr, "ERROR: interface \"%s\" does not exist\n", interface);
+        free(self);
+        return NULL;
+    }
+
+    /* Currently only skb mode is supported */
+    self->attach_mode = XDP_MODE_SKB;
+
     return self;
 }
 
@@ -78,6 +96,36 @@ xdp_iface_destroy (xdp_iface_t **self_p)
     }
 }
 
+int
+xdp_iface_load_program(xdp_iface_t *self, const char *xdp_prog_path)
+{
+    char errmsg[STRERR_BUFSIZE];
+    int err = 0;
+
+    self->xdp_prog = xdp_program__open_file(xdp_prog_path, NULL, NULL);
+    err = libxdp_get_error(self->xdp_prog);
+    if (err) {
+        libxdp_strerror(err, errmsg, sizeof(errmsg));
+        fprintf(stderr, "ERROR: program loading failed: %s\n", errmsg);
+    }
+    else {
+        err = xdp_program__attach(self->xdp_prog, self->ifindex, self->attach_mode, 0);
+        if (err) {
+            libxdp_strerror(err, errmsg, sizeof(errmsg));
+            fprintf(stderr, "ERROR: attaching program failed: %s\n", errmsg);
+        }
+    }
+
+    return err;
+}
+
+void xdp_iface_unload_program(xdp_iface_t *self)
+{
+    xdp_program__detach(self->xdp_prog, self->ifindex, self->attach_mode, 0);
+    xdp_program__close(self->xdp_prog);
+}
+
+
 //  --------------------------------------------------------------------------
 //  Self test of this class
 
@@ -97,13 +145,27 @@ xdp_iface_destroy (xdp_iface_t **self_p)
 void
 xdp_iface_test (bool verbose)
 {
+    int ret = 0;
+
+    const char *xdp_prog_path = "xdp_sock_bpf.o";
+
     printf (" * xdp_iface: ");
 
     //  @selftest
     //  Simple create/destroy test
     xdp_iface_t *self = xdp_iface_new (XDP_IFACE_DEFAULT);
     assert (self);
+    ret = xdp_iface_load_program(self, xdp_prog_path);
+    if (0 != ret) {
+        fprintf(stderr, "Failed to load program (%s)!", xdp_prog_path);
+        goto exit;
+    }
+
+    xdp_iface_unload_program(self);
+
+exit:
     xdp_iface_destroy (&self);
+
     //  @end
     printf ("OK\n");
 }

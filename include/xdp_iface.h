@@ -52,9 +52,14 @@ XDPIFACE_EXPORT void
     xdp_iface_destroy (xdp_iface_t **self_p);
 
 //  *** Draft method, for development use, may change without warning ***
-//  Shout once!
+//  Load compiled XDP BPF object
 XDPIFACE_EXPORT int
-    xdp_iface_load_xdp (xdp_iface_t *self, const char *xdp_program_file);
+    xdp_iface_load_program (xdp_iface_t *self, const char *xdp_prog_path);
+
+//  *** Draft method, for development use, may change without warning ***
+//  Unload compiled XDP BPF object
+XDPIFACE_EXPORT void
+    xdp_iface_unload_program (xdp_iface_t *self);
 
 //  *** Draft method, for development use, may change without warning ***
 //  Self test of this class.
