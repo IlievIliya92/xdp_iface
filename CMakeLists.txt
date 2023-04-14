@@ -85,6 +85,7 @@ set (xdpiface_headers
 IF (ENABLE_DRAFTS)
     list(APPEND xdpiface_headers
         include/xdp_iface.h
+        include/xdp_sock.h
     )
 ENDIF (ENABLE_DRAFTS)
 
@@ -103,6 +104,7 @@ set (xdpiface_sources
 IF (ENABLE_DRAFTS)
     list (APPEND xdpiface_sources
         src/xdp_iface.c
+        src/xdp_sock.c
     )
 ENDIF (ENABLE_DRAFTS)
 
@@ -305,6 +307,7 @@ set(TEST_CLASSES
 IF (ENABLE_DRAFTS)
     list (APPEND TEST_CLASSES
     xdp_iface
+    xdp_sock
     )
 ENDIF (ENABLE_DRAFTS)
 

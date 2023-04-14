@@ -105,12 +105,15 @@
 #ifdef XDPIFACE_BUILD_DRAFT_API
 typedef struct _xdp_iface_t xdp_iface_t;
 #define XDP_IFACE_T_DEFINED
+typedef struct _xdp_sock_t xdp_sock_t;
+#define XDP_SOCK_T_DEFINED
 #endif // XDPIFACE_BUILD_DRAFT_API
 
 
 //  Public classes, each with its own header file
 #ifdef XDPIFACE_BUILD_DRAFT_API
 #include "xdp_iface.h"
+#include "xdp_sock.h"
 #endif // XDPIFACE_BUILD_DRAFT_API
 
 #ifdef XDPIFACE_BUILD_DRAFT_API

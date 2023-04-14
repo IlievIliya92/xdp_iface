@@ -1,0 +1,12 @@
+<class name = "xdp_sock">
+    The xdp_sock class!
+
+    <constructor>
+        Create a new xdp socket
+        <argument name = "xdp_interface" type = "xdp iface" />
+    </constructor>
+
+    <destructor>
+    </destructor>
+
+</class>

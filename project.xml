@@ -8,6 +8,7 @@
 
     <version major = "1" minor = "1" patch = "0" />
     <class name = "xdp_iface"/>
+    <class name = "xdp_sock"/>
 
     <!-- <main name = "xdp_bpf" private = "1" />
     -->

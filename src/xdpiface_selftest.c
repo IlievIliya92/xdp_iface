@@ -48,6 +48,7 @@ all_tests [] = {
 #ifdef XDPIFACE_BUILD_DRAFT_API
 // Tests for draft public classes:
     { "xdp_iface", xdp_iface_test, false, true, NULL },
+    { "xdp_sock", xdp_sock_test, false, true, NULL },
 #endif // XDPIFACE_BUILD_DRAFT_API
     {NULL, NULL, 0, 0, NULL}          //  Sentinel
 };
