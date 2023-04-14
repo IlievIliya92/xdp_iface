@@ -1,0 +1,360 @@
+.template 0
+#   zproject
+#
+#   This is a code generator built using the iMatix GSL code generation
+#   language. See https://github.com/zeromq/gsl for details.
+#
+#   Copyright (c) the Contributors as noted in the AUTHORS file.
+#   This file is part of zproject.
+#
+#   This Source Code Form is subject to the terms of the Mozilla Public
+#   License, v. 2.0. If a copy of the MPL was not distributed with this
+#   file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+#   Resolve XML includes
+function resolve_includes (xml)
+    for my.xml.include
+        if !defined (include.filename)
+            abort "E: required attribute 'filename' not defined"
+        endif
+        if ("license.xml" = include.filename) & (!file.exists(include.filename))
+            echo "W: license.xml included but not present; generating a new one with just a current starting_year and a reminder to word the license"
+            # Assign HHMMSSss into my.time and YYYYMMDD into my.date:
+            my.time = time.now(my.date)
+            my.now_year = string.substr(my.date, 0, , 4)
+            echo "W: detected current 'starting_year' as '$(my.now_year)'"
+            my.outfile = file.open(include.filename, 'w')
+            if (defined(my.outfile))
+                file.write (my.outfile, "<starting_year>$(my.now_year)</starting_year>")
+                file.write (my.outfile, "<license>")
+                file.write (my.outfile, "LICENSE FOR THIS PROJECT IS NOT DEFINED!")
+                file.write (my.outfile, "")
+                file.write (my.outfile, "Copyright (C) $(my.now_year)- by $(project.name) Developers &lt;$(project.email)&gt;")
+                file.write (my.outfile, "")
+                file.write (my.outfile, "Please edit license.xml and populate the 'license' tag with proper")
+                file.write (my.outfile, "copyright and legalese contents, and regenerate the zproject.")
+                file.write (my.outfile, "")
+                file.write (my.outfile, "LICENSE FOR THIS PROJECT IS NOT DEFINED!")
+                file.write (my.outfile, "</license>")
+                file.close (my.outfile)
+            else
+                abort "E: Could not create $(include.filename)"
+            endif
+        endif
+        my.include_file = my.xml.load_file (filename)?
+        if defined (my.include_file)
+            move my.include_file after include
+        else
+            abort "E: <include> failed: $(xml.error?)"
+        endif
+    endfor
+endfunction
+
+# Sanity-check if project.xml, license.xml etc. reference the current
+# year (as starting, ending, just listed...) in Copyright line context
+function check_license_years (xml)
+    if count (my.xml.license) > 0
+        # Assign HHMMSSss into my.time and YYYYMMDD into my.date:
+        my.time = time.now(my.date)
+        my.now_year = string.substr(my.date, 0, , 4)
+        my.year_seen = 0
+        for my.xml.license
+            # This pattern supports several ways of spelling the copyright
+            # character (ASCII code 169) or registered symbol (ASCII 174).
+            # Note that in XML tag they should be spelled via escape sequences;
+            # a direct UTF character in the tag can be misinterpreted by GSL.
+            if regexp.match ("(opyright|\(C\)|\&\#(169|[xX][aA]9|174|[xX][aA][eE])\;|\&copy\;|&copy;|&#(169|174|[xX][aA]9|[xX][aA][eE]);|$(conv.chr(169))|$(conv.chr(174))).*$(my.now_year)", license.)
+                my.year_seen += 1
+            endif
+        endfor
+        if (0 = my.year_seen)
+            echo "W: Current year '$(my.now_year)' is not listed in any license tag / Copyright line!"
+            echo "W: Do you want to Ctrl+Break now, edit your license.xml and regenerate the project?"
+            # Per PR review, there's no hard need for a pause - after the
+            # Bern convention the "copyright YYYY-YYYY" line is actually not
+            # legally required almost anywhere in the world, and is purely
+            # informative. Copyright is implicit and automatic, and with
+            # git there is enough metadata to satisfty any lawyer/court.
+            if (my.xml.check_license_years ?= 1)
+                echo "W: (Sleeping 5 sec...)"
+                thread.sleep (500)
+                echo "W: Oh well, moving on with possibly obsoleted copyrights"
+            endif
+            if (my.xml.check_license_years ?= 2)
+                abort "E: This project is configured to require that copyrights are up to date"
+            endif
+        endif
+    endif
+endfunction
+
+resolve_includes (project)
+check_license_years (project)
+
+# Check if project contains one or more C++ sources
+function project_use_cxx ()
+    use_cxx = 0
+    for class
+        if file.exists ("src/$(name:c).cc")
+            project.source_ext = "cc"
+            return 1
+        endif
+    endfor
+    for main
+        if file.exists ("src/$(name:c).cc")
+            project.source_ext = "cc"
+            return 1
+        endif
+    endfor
+    return 0
+endfunction
+
+function resolve_classfilename_option()
+    for classfilename
+        if defined (classfilename.pretty\-print)
+            project.filename_prettyprint = classfilename.pretty\-print
+        endif
+
+        if defined (classfilename.source\-extension)
+            project.source_ext = classfilename.source\-extension
+        endif
+
+        if defined (classfilename.header\-extension)
+            project.header_ext = classfilename.header\-extension
+        endif
+
+        if defined (classfilename.use\-cxx)
+            if classfilename.use\-cxx ?= "true"
+                use_cxx = 1
+            elsif classfilename.use\-cxx ?= "false"
+                use_cxx = 0
+            endif
+        endif
+
+        # Some but not all C++ projects require the fuller scope of C++11
+        # and do not compile under gcc-4.8 which is Travis default in "trusty".
+        # This optional toggle allows to require a newer gcc-4.9 for them.
+        # Note that with current implementation, it effectively hardcodes
+        # the use of specifically 4.9, not allowing for "4.9 or newer".
+        if defined (classfilename.use\-cxx\-gcc\-4\-9)
+            if classfilename.use\-cxx\-gcc\-4\-9 ?= "true"
+                use_cxx_gcc_4_9 = 1
+                use_cxx = 1
+            elsif classfilename.use\-cxx\-gcc\-4\-9 ?= "false"
+                use_cxx_gcc_4_9 = 0
+            endif
+        endif
+
+        if defined (classfilename.keep\-tree)
+            if classfilename.keep\-tree ?= "true"
+                project.keep_tree = 1
+            elsif classfilename.keep\-tree ?= "false"
+                project.keep_tree = 0
+            endif
+        endif
+
+        if defined (classfilename.pkgincludedir)
+            if classfilename.pkgincludedir ?= "true"
+                project.pkgincludedir = 1
+            elsif classfilename.pkgincludedir ?= "false"
+                project.pkgincludedir = 0
+            endif
+        endif
+
+        return
+    endfor
+endfunction
+
+project.filename_prettyprint = "c"
+project.header_ext = "h"
+project.source_ext = "c"
+project.use_cxx = project_use_cxx ()
+project.use_cxx_gcc_4_9 = 0
+project.keep_tree = 0
+project.pkgincludedir = 0
+resolve_classfilename_option()
+project.name ?= "myproject"
+project.prefix ?= "$(project.name:c)"
+project.linkname ?= project.prefix
+project.libname ?= "lib" + project.linkname
+project.prelude ?= project.prefix + "_prelude.h"
+project.description ?= "Project"
+project.repository ?= "https://github.com/zeromq/$(project.name:c)"
+project.header ?= "$(project.name:$(project.filename_prettyprint)).$(project.header_ext)"
+
+if count (project.version) = 0
+    new version to project
+    endnew
+endif
+project->version.major ?= 0
+project->version.minor ?= 0
+project->version.patch ?= 0
+project.email ?= "email@hostname.com"
+if count (project.license) = 0
+    new license to project
+    endnew
+endif
+project->license. ?= "Copyright (c) the Authors"
+
+project.has_main = (count (main) > 0)
+project.has_bin = (count (bin) > 0)
+project.has_classes = (count (class) > 0)
+project.exports_classes = (count (class, !defined (class.private)) > 0)
+project.generated_warning_header ?= "\
+################################################################################
+#  THIS FILE IS 100% GENERATED BY ZPROJECT; DO NOT EDIT EXCEPT EXPERIMENTALLY  #
+#  Read the zproject/README.md for information about making permanent changes. #
+################################################################################"
+project.generated_warning_header_for_dot_bat ?= "\
+@::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+@::  THIS FILE IS 100% GENERATED BY ZPROJECT; DO NOT EDIT EXCEPT EXPERIMENTALLY  ::
+@::  Read the zproject/README.md for information about making permanent changes. ::
+@::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
+project.generated_warning_header_for_lua ?= "\
+--------------------------------------------------------------------------------
+--  THIS FILE IS 100% GENERATED BY ZPROJECT; DO NOT EDIT EXCEPT EXPERIMENTALLY  -
+--  Read the zproject/README.md for information about making permanent changes. -
+--------------------------------------------------------------------------------"
+
+function chmod_x (filename)
+    my.shell = proc.new ("chmod +x $(my.filename:)")
+    my.shell.run ()
+endfunction
+
+function register_snippet (target, name)
+    new snippet to project
+        snippet.target = my.target
+        snippet.name = my.name
+    endnew
+endfunction
+
+function insert_snippet (target)
+    for project.snippet where snippet.target = my.target
+        snippet_$(snippet.target:c)_$(snippet.name:c) ()
+    endfor
+endfunction
+
+function register_target (target, detail)
+    new handler to project
+        handler.target = my.target
+        handler.detail = my.detail
+    endnew
+endfunction
+
+function assume_target (target)
+    if count (project.target, name = my.target) = 0
+        new target to project
+            target.name = my.target
+        endnew
+    endif
+endfunction
+
+function build_target_in_scope (target, detail)
+    echo "Building $(my.detail:) ($(my.target))"
+    copy project to root as project_copy
+    scope root->project_copy as project
+        #   Resolve target options if any
+        for project.target where name = my.target
+            for option
+                if defined (option.value)
+                    project.$(my.target)_$(option.name:c) = option.value
+                else
+                    for option.item
+                        copy item to project as $(my.target)_$(option.name:c)
+                    endfor
+                endif
+            endfor
+        endfor
+        target_$(my.target:c) ()
+    endscope
+
+    if switches.save ?= 1
+        root->project_copy.save ("save.xml")
+    endif
+    delete root->project_copy
+endfunction
+
+function show_valid_targets_and_abort()
+    for project.handler by handler
+        echo "    $(handler.target)\
+                $(handler.detail:)"
+    endfor
+    abort "End of target list."
+endfunction
+
+function build_target (target)
+    if my.target = "?"
+        echo "Valid targets are:"
+        show_valid_targets_and_abort()
+    elsif my.target = "-"   # No targets
+        echo "Building without targets"
+    elsif my.target = "*"   # All targets
+        for project.handler by target
+            if count (project.target, name = handler.target) = 0
+                build_target_in_scope (handler.target, detail)
+            endif
+        endfor
+    else
+        for project.handler where handler.target = my.target
+            build_target_in_scope (handler.target, detail)
+        else
+            echo "$(my.target) is not a valid target; valid targets are:"
+            show_valid_targets_and_abort()
+        endfor
+    endif
+endfunction
+
+#  These scripts must be run first to resolve missing or
+#  implicit details in the model before code generation.
+gsl from "zproject_cucumber.gsl"
+gsl from "zproject_projects.gsl"
+gsl from "zproject_skeletons.gsl"
+gsl from "zproject_class_api.gsl"
+
+#   Generate main class support
+gsl from "zproject_class.gsl"
+
+#   Always run these, in any order
+gsl from "zproject_bench.gsl"
+gsl from "zproject_git.gsl"
+gsl from "zproject_valgrind.gsl"
+
+#   Load all targets
+gsl from "zproject_android.gsl"
+gsl from "zproject_autotools.gsl"
+gsl from "zproject_cmake.gsl"
+gsl from "zproject_cygwin.gsl"
+gsl from "zproject_debian.gsl"
+gsl from "zproject_delphi.gsl"
+gsl from "zproject_docker.gsl"
+gsl from "zproject_gh_actions.gsl"
+gsl from "zproject_gyp.gsl"
+gsl from "zproject_ios.gsl"
+gsl from "zproject_java.gsl"
+gsl from "zproject_java_msvc.gsl"
+gsl from "zproject_jenkins.gsl"
+gsl from "zproject_mingw32.gsl"
+gsl from "zproject_nodejs.gsl"
+gsl from "zproject_nuget.gsl"
+gsl from "zproject_obs.gsl"
+gsl from "zproject_python.gsl"
+gsl from "zproject_python_cffi.gsl"
+gsl from "zproject_lua_ffi.gsl"
+gsl from "zproject_qml.gsl"
+gsl from "zproject_qt.gsl"
+gsl from "zproject_redhat.gsl"
+gsl from "zproject_rpi.gsl"
+gsl from "zproject_ruby.gsl"
+gsl from "zproject_systemd.gsl"
+gsl from "zproject_travis.gsl"
+gsl from "zproject_vagrant.gsl"
+
+#   Build targets requested by project
+if defined (switches.target)
+    build_target (switches.target)
+else
+    for project.target
+        build_target (target.name)
+    endfor
+endif
+
+.endtemplate
