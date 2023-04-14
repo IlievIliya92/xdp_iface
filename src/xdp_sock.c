@@ -32,14 +32,102 @@
 @end
 */
 
+/******************************** INCLUDE FILES *******************************/
+#include <errno.h>
+#include <sys/mman.h>
+#include <linux/if_link.h>
+
+#include <xdp/xsk.h>
+//#include <xdp/libxdp.h>
+//#include <bpf/libbpf.h>
+//#include <bpf/bpf.h>
+
 #include "xdpiface_classes.h"
 
-//  Structure of our class
+/******************************** LOCAL DEFINES *******************************/
+#define MAX_SOCKS 4
+
+#define XDP_IFACE_XSK_FRAMES              (4 * 4096)
+#define XDP_IFACE_XSK_FRAMESIZE           (XSK_UMEM__DEFAULT_FRAME_SIZE)
+
+
+/********************************* TYPEDEFS ***********************************/
+
+typedef struct _xsk_umem_info_t {
+    struct xsk_ring_prod fq;
+    struct xsk_ring_cons cq;
+    struct xsk_umem *umem;
+    void *buffer;
+} xsk_umem_info_t;
+
+//  Structure of xdp_sock class
 
 struct _xdp_sock_t {
-    //  Declare class properties here
+    struct xsk_ring_cons rx;
+    struct xsk_ring_prod tx;
+    struct xsk_socket *xsk;
+    __u32 outstanding_tx;
+
+    xsk_umem_info_t *umem;
+    void *bufs;
 };
 
+/********************************* LOCAL DATA *********************************/
+
+/******************************* LOCAL FUNCTIONS ******************************/
+
+static xsk_umem_info_t *
+xdp_iface_xsk_configure_umem(void *buffer, __u64 buff_size)
+{
+    xsk_umem_info_t *umem = NULL;
+    struct xsk_umem_config cfg = {
+        .fill_size = XSK_RING_PROD__DEFAULT_NUM_DESCS * 2,
+        .comp_size = XSK_RING_CONS__DEFAULT_NUM_DESCS,
+        .frame_size = XDP_IFACE_XSK_FRAMESIZE,
+        .frame_headroom = XSK_UMEM__DEFAULT_FRAME_HEADROOM,
+        .flags = 0
+    };
+    int ret = 0;
+
+    umem = calloc(1, sizeof(*umem));
+    if (umem == NULL) {
+        fprintf(stderr, "Memmory allocation failed! err: \"%s\"\n", strerror(errno));
+        return NULL;
+    }
+
+    ret = xsk_umem__create(&umem->umem, buffer, buff_size, &umem->fq, &umem->cq,
+                   &cfg);
+    if (0 != ret) {
+        fprintf(stderr, "UMEM create failed! err: %d/\"%s\"\n", ret, strerror(errno));
+        free(umem);
+        return NULL;
+    }
+    umem->buffer = buffer;
+
+    return umem;
+}
+
+static int
+xdp_iface_xsk_populate_fill_ring(xsk_umem_info_t *umem)
+{
+    int ret = 0;
+    int i = 0;
+    __u32 idx = 0;
+
+    ret = xsk_ring_prod__reserve(&umem->fq,
+                     XSK_RING_PROD__DEFAULT_NUM_DESCS * 2, &idx);
+    if (XSK_RING_PROD__DEFAULT_NUM_DESCS * 2 != ret) {
+        fprintf(stderr, "Ring reserver failed! err: %d/\"%s\"\n", ret, strerror(errno));
+    } else {
+        for (i = 0; i < XSK_RING_PROD__DEFAULT_NUM_DESCS * 2; i++)
+            *xsk_ring_prod__fill_addr(&umem->fq, idx++) = i * XDP_IFACE_XSK_FRAMESIZE;
+        xsk_ring_prod__submit(&umem->fq, XSK_RING_PROD__DEFAULT_NUM_DESCS * 2);
+    }
+
+    return ret;
+}
+
+/***************************** INTERFACE FUNCTIONS ****************************/
 
 //  --------------------------------------------------------------------------
 //  Create a new xdp_sock
@@ -47,9 +135,41 @@ struct _xdp_sock_t {
 xdp_sock_t *
 xdp_sock_new (xdp_iface_t *xdp_interface)
 {
+    assert(xdp_interface);
+    struct xsk_socket_config cfg;
+    int ret = 0;
+
     xdp_sock_t *self = (xdp_sock_t *) zmalloc (sizeof (xdp_sock_t));
     assert (self);
+
     //  Initialize class properties here
+    self->bufs = mmap(NULL, XDP_IFACE_XSK_FRAMES * XDP_IFACE_XSK_FRAMESIZE,
+            PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (self->bufs == MAP_FAILED) {
+        fprintf(stderr, "ERROR: mmap failed\n");
+        free(self);
+        return NULL;
+    }
+
+    /* Create socket */
+    self->umem = xdp_iface_xsk_configure_umem(self->bufs,
+        XDP_IFACE_XSK_FRAMES * XDP_IFACE_XSK_FRAMESIZE);
+    xdp_iface_xsk_populate_fill_ring(self->umem);
+
+    cfg.rx_size = XSK_RING_CONS__DEFAULT_NUM_DESCS;
+    cfg.tx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS;
+    cfg.libxdp_flags = 0;
+    cfg.xdp_flags = XDP_FLAGS_SKB_MODE;
+    cfg.bind_flags = XDP_COPY;
+
+    ret = xsk_socket__create(&self->xsk, xdp_iface_get_name(xdp_interface), 0, self->umem->umem,
+                 &self->rx, &self->tx, &cfg);
+    if (ret) {
+        fprintf(stderr, "Failed to create socket! err: %d/\"%s\"\n", ret, strerror(errno));
+        free(self);
+        return NULL;
+    }
+
     return self;
 }
 
@@ -64,6 +184,11 @@ xdp_sock_destroy (xdp_sock_t **self_p)
     if (*self_p) {
         xdp_sock_t *self = *self_p;
         //  Free class properties here
+        struct xsk_umem *umem = self->umem->umem;
+        xsk_socket__delete(self->xsk);
+        (void)xsk_umem__delete(umem);
+
+        munmap(self->bufs, XDP_IFACE_XSK_FRAMES * XDP_IFACE_XSK_FRAMESIZE);
         //  Free object itself
         free (self);
         *self_p = NULL;
