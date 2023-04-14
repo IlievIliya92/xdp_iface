@@ -52,8 +52,10 @@ lib.xdp_iface_new.restype = xdp_iface_p
 lib.xdp_iface_new.argtypes = [c_char_p]
 lib.xdp_iface_destroy.restype = None
 lib.xdp_iface_destroy.argtypes = [POINTER(xdp_iface_p)]
-lib.xdp_iface_load_xdp.restype = c_int
-lib.xdp_iface_load_xdp.argtypes = [xdp_iface_p, c_char_p]
+lib.xdp_iface_load_program.restype = c_int
+lib.xdp_iface_load_program.argtypes = [xdp_iface_p, c_char_p]
+lib.xdp_iface_unload_program.restype = None
+lib.xdp_iface_unload_program.argtypes = [xdp_iface_p]
 lib.xdp_iface_test.restype = None
 lib.xdp_iface_test.argtypes = [c_bool]
 
@@ -106,11 +108,17 @@ class XdpIface(object):
         "Determine whether the object is valid by converting to boolean" # Python 2
         return self._as_parameter_.__nonzero__()
 
-    def load_xdp(self, xdp_program_file):
+    def load_program(self, xdp_prog_path):
         """
-        Shout once!
+        Load compiled XDP BPF object
         """
-        return lib.xdp_iface_load_xdp(self._as_parameter_, xdp_program_file)
+        return lib.xdp_iface_load_program(self._as_parameter_, xdp_prog_path)
+
+    def unload_program(self):
+        """
+        Unload compiled XDP BPF object
+        """
+        return lib.xdp_iface_unload_program(self._as_parameter_)
 
     @staticmethod
     def test(verbose):
