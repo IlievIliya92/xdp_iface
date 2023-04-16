@@ -62,6 +62,8 @@ lib.xdp_iface_unload_program.restype = None
 lib.xdp_iface_unload_program.argtypes = [xdp_iface_p]
 lib.xdp_iface_get_name.restype = c_char_p
 lib.xdp_iface_get_name.argtypes = [xdp_iface_p]
+lib.xdp_iface_get_prog.restype = c_void_p
+lib.xdp_iface_get_prog.argtypes = [xdp_iface_p]
 lib.xdp_iface_test.restype = None
 lib.xdp_iface_test.argtypes = [c_bool]
 
@@ -131,6 +133,12 @@ class XdpIface(object):
         Retrive xdp interface name
         """
         return lib.xdp_iface_get_name(self._as_parameter_)
+
+    def get_prog(self):
+        """
+        Retrive xdp program descriptor
+        """
+        return c_void_p(lib.xdp_iface_get_prog(self._as_parameter_))
 
     @staticmethod
     def test(verbose):

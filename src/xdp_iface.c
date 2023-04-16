@@ -137,6 +137,12 @@ xdp_iface_get_name (xdp_iface_t *self)
     return self->interface;
 }
 
+void *
+xdp_iface_get_prog (xdp_iface_t *self)
+{
+    return (void *)self->xdp_prog;
+}
+
 //  --------------------------------------------------------------------------
 //  Self test of this class
 

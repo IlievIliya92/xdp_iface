@@ -67,6 +67,11 @@ XDPIFACE_EXPORT const char *
     xdp_iface_get_name (xdp_iface_t *self);
 
 //  *** Draft method, for development use, may change without warning ***
+//  Retrive xdp program descriptor
+XDPIFACE_EXPORT void *
+    xdp_iface_get_prog (xdp_iface_t *self);
+
+//  *** Draft method, for development use, may change without warning ***
 //  Self test of this class.
 XDPIFACE_EXPORT void
     xdp_iface_test (bool verbose);

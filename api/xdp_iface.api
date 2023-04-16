@@ -26,4 +26,9 @@
         <return type="string"/>
     </method>
 
+    <method name = "get_prog">
+    Retrive xdp program descriptor
+        <return type="anything"/>
+    </method>
+
 </class>
