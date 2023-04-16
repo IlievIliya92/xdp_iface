@@ -6,7 +6,7 @@ NAME        = "xdpiface"
 VERSION     = "1.1.0"
 LICENSE     = "mit"
 DESCRIPTION = """Python bindings of: project"""
-URL         = "https://github.com/zeromq/xdpiface"
+URL         = "https://github.com/ilieviliya92/xdp_iface"
 PACKAGES    = ["xdpiface"]
 REQUIRES    = [
 ]
