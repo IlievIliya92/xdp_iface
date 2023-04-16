@@ -46,9 +46,11 @@
 //#include <bpf/libbpf.h>
 #include <bpf/bpf.h>
 
+#include "xdp_log.h"
 #include "xdpiface_classes.h"
 
 /******************************** LOCAL DEFINES *******************************/
+#define XDP_MODULE_NAME "xdp_sock"
 #define MAX_SOCKS 4
 
 #define XDP_IFACE_XSK_FRAMES              (4 * 4096)
@@ -97,14 +99,14 @@ xdp_sock_xsk_configure_umem(void *buffer, __u64 buff_size)
 
     umem = calloc(1, sizeof(*umem));
     if (umem == NULL) {
-        fprintf(stderr, "Memmory allocation failed! err: \"%s\"\n", strerror(errno));
+        XDP_LOG_MSG(XDP_LOG_ERROR, "Memmory allocation failed! err: \"%s\"\n", strerror(errno));
         return NULL;
     }
 
     ret = xsk_umem__create(&umem->umem, buffer, buff_size, &umem->fq, &umem->cq,
                    &cfg);
     if (0 != ret) {
-        fprintf(stderr, "UMEM create failed! err: %d/\"%s\"\n", ret, strerror(errno));
+        XDP_LOG_MSG(XDP_LOG_ERROR, "UMEM create failed! err: %d/\"%s\"\n", ret, strerror(errno));
         free(umem);
         return NULL;
     }
@@ -123,7 +125,7 @@ xdp_sock_xsk_populate_fill_ring(xsk_umem_info_t *umem)
     ret = xsk_ring_prod__reserve(&umem->fq,
                      XSK_RING_PROD__DEFAULT_NUM_DESCS * 2, &idx);
     if (XSK_RING_PROD__DEFAULT_NUM_DESCS * 2 != ret) {
-        fprintf(stderr, "Ring reserver failed! err: %d/\"%s\"\n", ret, strerror(errno));
+        XDP_LOG_MSG(XDP_LOG_ERROR, "Ring reserver failed! err: %d/\"%s\"\n", ret, strerror(errno));
     } else {
         for (i = 0; i < XSK_RING_PROD__DEFAULT_NUM_DESCS * 2; i++)
             *xsk_ring_prod__fill_addr(&umem->fq, idx++) = i * XDP_IFACE_XSK_FRAMESIZE;
@@ -152,7 +154,7 @@ xdp_sock_new (xdp_iface_t *xdp_interface)
     self->bufs = mmap(NULL, XDP_IFACE_XSK_FRAMES * XDP_IFACE_XSK_FRAMESIZE,
             PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (self->bufs == MAP_FAILED) {
-        fprintf(stderr, "ERROR: mmap failed\n");
+        XDP_LOG_MSG(XDP_LOG_ERROR, "mmap failed\n");
         free(self);
         return NULL;
     }
@@ -171,7 +173,7 @@ xdp_sock_new (xdp_iface_t *xdp_interface)
     ret = xsk_socket__create(&self->xsk, xdp_iface_get_name(xdp_interface), 0, self->umem->umem,
                  &self->rx, &self->tx, &cfg);
     if (ret) {
-        fprintf(stderr, "Failed to create socket! err: %d/\"%s\"\n", ret, strerror(errno));
+        XDP_LOG_MSG(XDP_LOG_ERROR, "Failed to create socket! err: %d/\"%s\"\n", ret, strerror(errno));
         /** TODO: free res */
         free(self);
         return NULL;
@@ -263,7 +265,7 @@ xdp_sock_lookup_bpf_map(xdp_sock_t *self, xdp_iface_t *xdp_interface, const char
     free(map_ids);
 
     if (xsks_map_fd < 0) {
-        fprintf(stderr, "ERROR: no xsks map found: %s\n", strerror(xsks_map_fd));
+        XDP_LOG_MSG(XDP_LOG_ERROR, "No xsks map found: %s\n", strerror(xsks_map_fd));
         return -1;
     }
 
@@ -310,7 +312,7 @@ xdp_sock_get_batch (xdp_sock_t *self, uint32_t *pkts_recvd, uint32_t nb)
     while (ret != *pkts_recvd) {
         if (ret < 0)
         {
-            fprintf(stderr, "Failed....");
+            XDP_LOG_MSG(XDP_LOG_ERROR, "Sock get batch failed....");
             return -1;
         }
 
@@ -414,8 +416,7 @@ xdp_sock_test (bool verbose)
     char i_buffer[9000];
     size_t i_buffer_size = 0;
 
-
-    printf (" * xdp_sock: ");
+    XDP_LOG_MSG(XDP_LOG_INFO, " * xdp_sock: ");
 
     //  @selftest
     xdp_iface_t *xdp_iface = xdp_iface_new (XDP_IFACE_DEFAULT);
@@ -423,7 +424,7 @@ xdp_sock_test (bool verbose)
 
     ret = xdp_iface_load_program(xdp_iface, xdp_prog_path);
     if (0 != ret) {
-        fprintf(stderr, "Failed to load program (%s)!", xdp_prog_path);
+        XDP_LOG_MSG(XDP_LOG_ERROR, "Failed to load program (%s)!", xdp_prog_path);
         goto exit;
     }
 
@@ -466,5 +467,5 @@ exit:
     xdp_iface_destroy (&xdp_iface);
 
     //  @end
-    printf ("OK\n");
+    XDP_LOG_MSG(XDP_LOG_INFO, "OK\n");
 }
