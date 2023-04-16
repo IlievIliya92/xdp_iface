@@ -36,9 +36,11 @@
 #include <net/if.h>
 #include <xdp/libxdp.h>
 
+#include "xdp_log.h"
 #include "xdpiface_classes.h"
 
 /******************************** LOCAL DEFINES *******************************/
+#define XDP_MODULE_NAME "xdp_iface"
 #define XDP_IFACE_STRERR_BUFSIZE          1024
 
 /********************************* TYPEDEFS ***********************************/
@@ -58,8 +60,13 @@ struct _xdp_iface_t {
 
 /***************************** INTERFACE FUNCTIONS ****************************/
 //  --------------------------------------------------------------------------
-//  Create a new xdp_iface
-
+/**
+ *
+ * Create new xdp_iface object.
+ *
+ * Returns:
+ *     On success new xdp_iface object, or NULL if the new xdp_iface could not be created.
+ */
 xdp_iface_t *
 xdp_iface_new (const char *interface)
 {
@@ -71,7 +78,7 @@ xdp_iface_new (const char *interface)
     //  Initialize class properties here
     self->ifindex = if_nametoindex(interface);
     if (!self->ifindex) {
-        fprintf(stderr, "ERROR: interface \"%s\" does not exist\n", interface);
+        XDP_LOG_MSG(XDP_LOG_ERROR, "Interface \"%s\" does not exist\n", interface);
         free(self);
         return NULL;
     }
@@ -85,8 +92,18 @@ xdp_iface_new (const char *interface)
 
 
 //  --------------------------------------------------------------------------
-//  Destroy the xdp_iface
-
+/**
+ *
+ * Destroy xdp_iface object. You must use this for any tcp server created via the
+ * xdp_iface_new method.
+ *
+ * Parameters:
+ *      self_p (xdp_iface_t **): pointer to xdp_iface_t object reference,
+ *                               so the destructor can nullify it
+ *
+ * Returns:
+ *      None (void)
+ */
 void
 xdp_iface_destroy (xdp_iface_t **self_p)
 {
@@ -111,13 +128,13 @@ xdp_iface_load_program(xdp_iface_t *self, const char *xdp_prog_path)
     err = libxdp_get_error(self->xdp_prog);
     if (err) {
         libxdp_strerror(err, errmsg, sizeof(errmsg));
-        fprintf(stderr, "ERROR: program loading failed: %s\n", errmsg);
+        XDP_LOG_MSG(XDP_LOG_ERROR, "Program loading failed: %s\n", errmsg);
     }
     else {
         err = xdp_program__attach(self->xdp_prog, self->ifindex, self->attach_mode, 0);
         if (err) {
             libxdp_strerror(err, errmsg, sizeof(errmsg));
-            fprintf(stderr, "ERROR: attaching program failed: %s\n", errmsg);
+            XDP_LOG_MSG(XDP_LOG_ERROR, "Attaching program failed: %s\n", errmsg);
         }
     }
 
@@ -166,7 +183,7 @@ xdp_iface_test (bool verbose)
 
     const char *xdp_prog_path = "xdp_sock_bpf.o";
 
-    printf (" * xdp_iface: ");
+    XDP_LOG_MSG(XDP_LOG_INFO, " * xdp_iface: ");
 
     //  @selftest
     //  Simple create/destroy test
@@ -175,7 +192,7 @@ xdp_iface_test (bool verbose)
 
     ret = xdp_iface_load_program(self, xdp_prog_path);
     if (0 != ret) {
-        fprintf(stderr, "Failed to load program (%s)!", xdp_prog_path);
+        XDP_LOG_MSG(XDP_LOG_ERROR, "Failed to load program (%s)!", xdp_prog_path);
         goto exit;
     }
 
@@ -185,5 +202,5 @@ exit:
     xdp_iface_destroy (&self);
 
     //  @end
-    printf ("OK\n");
+    XDP_LOG_MSG(XDP_LOG_INFO, "OK\n");
 }
