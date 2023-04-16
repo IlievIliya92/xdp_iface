@@ -105,6 +105,7 @@ IF (ENABLE_DRAFTS)
     list (APPEND xdpiface_sources
         src/xdp_iface.c
         src/xdp_sock.c
+        src/xdp_log.c
     )
 ENDIF (ENABLE_DRAFTS)
 
