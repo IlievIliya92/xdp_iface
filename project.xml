@@ -2,6 +2,8 @@
          license = "MIT"
          name ="xdpiface"
          descriptiont="XDP BPF Interface"
+         url=" https://ilieviliya92.github.io/xdp_iface/"
+         repository="https://github.com/IlievIliya92/xdp_iface"
          check_license_years="0">
 
     <include filename = "license.xml"/>
