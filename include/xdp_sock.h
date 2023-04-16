@@ -48,6 +48,36 @@ XDPIFACE_EXPORT void
     xdp_sock_destroy (xdp_sock_t **self_p);
 
 //  *** Draft method, for development use, may change without warning ***
+//  Create a new xdp socket
+XDPIFACE_EXPORT int
+    xdp_sock_lookup_bpf_map (xdp_sock_t *self, xdp_iface_t *xdp_interface, const char *map_name, uint32_t key_size, uint32_t value_size);
+
+//  *** Draft method, for development use, may change without warning ***
+//  Set socket option
+XDPIFACE_EXPORT int
+    xdp_sock_set_sockopt (xdp_sock_t *self, int opt_type, int opt_value);
+
+//  *** Draft method, for development use, may change without warning ***
+//  Get socket file descriptor
+XDPIFACE_EXPORT int
+    xdp_sock_get_fd (xdp_sock_t *self);
+
+//  *** Draft method, for development use, may change without warning ***
+//  Get batch
+XDPIFACE_EXPORT int
+    xdp_sock_get_batch (xdp_sock_t *self, uint32_t *pkts_recvd, uint32_t nb);
+
+//  *** Draft method, for development use, may change without warning ***
+//  Release batch
+XDPIFACE_EXPORT int
+    xdp_sock_release_batch (xdp_sock_t *self, uint32_t pkts_recvd);
+
+//  *** Draft method, for development use, may change without warning ***
+//  Receive a packet from the batch
+XDPIFACE_EXPORT int
+    xdp_sock_recv (xdp_sock_t *self, char *buffer, size_t *buffer_size);
+
+//  *** Draft method, for development use, may change without warning ***
 //  Self test of this class.
 XDPIFACE_EXPORT void
     xdp_sock_test (bool verbose);

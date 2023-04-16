@@ -28,6 +28,9 @@
 #ifndef XDPIFACE_H_H_INCLUDED
 #define XDPIFACE_H_H_INCLUDED
 
+#include <stdint.h>
+#include <stddef.h>
+
 //  Include the project library file
 #include "xdpiface_library.h"
 

@@ -9,4 +9,45 @@
     <destructor>
     </destructor>
 
+    <method name = "lookup_bpf_map">
+        Create a new xdp socket
+        <argument name = "xdp_interface" type = "xdp iface" />
+        <argument name = "map_name"  type = "string" />
+        <argument name = "key_size" type = "number" size = "4" />
+        <argument name = "value_size" type = "number" size = "4" />
+        <return type="integer"/>
+    </method>
+
+    <method name = "set_sockopt">
+        Set socket option
+        <argument name = "opt_type" type = "integer" />
+        <argument name = "opt_value" type = "integer" />
+        <return type="integer"/>
+    </method>
+
+    <method name = "get_fd">
+        Get socket file descriptor
+        <return type="integer"/>
+    </method>
+
+    <method name = "get_batch">
+        Get batch
+        <argument name = "pkts_recvd" type = "number" size = "4" by_reference = "1" />
+        <argument name = "nb" type = "number" size = "4" />
+        <return type="integer"/>
+    </method>
+
+    <method name = "release_batch">
+        Release batch
+        <argument name = "pkts_recvd" type = "number" size = "4" />
+        <return type="integer"/>
+    </method>
+
+    <method name = "recv">
+        Receive a packet from the batch
+        <argument name = "buffer" type = "buffer" mutable = "1"  c_type = "char *"/>
+        <argument name = "buffer_size" type = "size" by_reference = "1" />
+        <return type="integer"/>
+    </method>
+
 </class>
