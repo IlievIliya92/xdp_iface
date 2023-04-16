@@ -153,6 +153,18 @@ lib.xdp_sock_new.restype = xdp_sock_p
 lib.xdp_sock_new.argtypes = [xdp_iface_p]
 lib.xdp_sock_destroy.restype = None
 lib.xdp_sock_destroy.argtypes = [POINTER(xdp_sock_p)]
+lib.xdp_sock_lookup_bpf_map.restype = c_int
+lib.xdp_sock_lookup_bpf_map.argtypes = [xdp_sock_p, xdp_iface_p, c_char_p, c_int, c_int]
+lib.xdp_sock_set_sockopt.restype = c_int
+lib.xdp_sock_set_sockopt.argtypes = [xdp_sock_p, c_int, c_int]
+lib.xdp_sock_get_fd.restype = c_int
+lib.xdp_sock_get_fd.argtypes = [xdp_sock_p]
+lib.xdp_sock_get_batch.restype = c_int
+lib.xdp_sock_get_batch.argtypes = [xdp_sock_p, POINTER(c_int), c_int]
+lib.xdp_sock_release_batch.restype = c_int
+lib.xdp_sock_release_batch.argtypes = [xdp_sock_p, c_int]
+lib.xdp_sock_recv.restype = c_int
+lib.xdp_sock_recv.argtypes = [xdp_sock_p, c_void_p, POINTER(c_size_t)]
 lib.xdp_sock_test.restype = None
 lib.xdp_sock_test.argtypes = [c_bool]
 
@@ -203,6 +215,42 @@ class XdpSock(object):
     def __nonzero__(self):
         "Determine whether the object is valid by converting to boolean" # Python 2
         return self._as_parameter_.__nonzero__()
+
+    def lookup_bpf_map(self, xdp_interface, map_name, key_size, value_size):
+        """
+        Create a new xdp socket
+        """
+        return lib.xdp_sock_lookup_bpf_map(self._as_parameter_, xdp_interface, map_name, key_size, value_size)
+
+    def set_sockopt(self, opt_type, opt_value):
+        """
+        Set socket option
+        """
+        return lib.xdp_sock_set_sockopt(self._as_parameter_, opt_type, opt_value)
+
+    def get_fd(self):
+        """
+        Get socket file descriptor
+        """
+        return lib.xdp_sock_get_fd(self._as_parameter_)
+
+    def get_batch(self, pkts_recvd, nb):
+        """
+        Get batch
+        """
+        return lib.xdp_sock_get_batch(self._as_parameter_, byref(c_int.from_param(pkts_recvd)), nb)
+
+    def release_batch(self, pkts_recvd):
+        """
+        Release batch
+        """
+        return lib.xdp_sock_release_batch(self._as_parameter_, pkts_recvd)
+
+    def recv(self, buffer, buffer_size):
+        """
+        Receive a packet from the batch
+        """
+        return lib.xdp_sock_recv(self._as_parameter_, buffer, byref(c_size_t.from_param(buffer_size)))
 
     @staticmethod
     def test(verbose):
