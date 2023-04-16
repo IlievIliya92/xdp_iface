@@ -3,7 +3,7 @@
 
     <constructor>
         Create a new xdp socket
-        <argument name = "xdp_interface" type = "xdp iface" />
+        <argument name = "xdp_interface" type = "xdp_iface" />
     </constructor>
 
     <destructor>
@@ -11,7 +11,7 @@
 
     <method name = "lookup_bpf_map">
         Create a new xdp socket
-        <argument name = "xdp_interface" type = "xdp iface" />
+        <argument name = "xdp_interface" type = "xdp_iface" />
         <argument name = "map_name"  type = "string" />
         <argument name = "key_size" type = "number" size = "4" />
         <argument name = "value_size" type = "number" size = "4" />
