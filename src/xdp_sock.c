@@ -168,7 +168,7 @@ xdp_sock_new (xdp_iface_t *xdp_interface)
     cfg.tx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS;
     cfg.libxdp_flags = 0;
     cfg.xdp_flags = XDP_FLAGS_SKB_MODE;
-    cfg.bind_flags = XDP_COPY;
+    cfg.bind_flags = XDP_COPY | XDP_USE_NEED_WAKEUP;
 
     ret = xsk_socket__create(&self->xsk, xdp_iface_get_name(xdp_interface), 0, self->umem->umem,
                  &self->rx, &self->tx, &cfg);
