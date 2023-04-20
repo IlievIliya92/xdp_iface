@@ -289,6 +289,12 @@ target_link_libraries(
 )
 endif()
 
+add_executable(
+    xdpiface_app
+    "${SOURCE_DIR}/src/xdp_iface_app.c"
+)
+target_link_libraries(xdpiface_app xdpiface)
+
 ########################################################################
 # tests
 ########################################################################
