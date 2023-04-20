@@ -159,12 +159,18 @@ lib.xdp_sock_set_sockopt.restype = c_int
 lib.xdp_sock_set_sockopt.argtypes = [xdp_sock_p, c_int, c_int]
 lib.xdp_sock_get_fd.restype = c_int
 lib.xdp_sock_get_fd.argtypes = [xdp_sock_p]
-lib.xdp_sock_get_batch.restype = c_int
-lib.xdp_sock_get_batch.argtypes = [xdp_sock_p, POINTER(c_int), c_int]
-lib.xdp_sock_release_batch.restype = c_int
-lib.xdp_sock_release_batch.argtypes = [xdp_sock_p, c_int]
+lib.xdp_sock_rx_batch_get_size.restype = c_int
+lib.xdp_sock_rx_batch_get_size.argtypes = [xdp_sock_p, POINTER(c_int), c_int]
+lib.xdp_sock_rx_batch_release.restype = c_int
+lib.xdp_sock_rx_batch_release.argtypes = [xdp_sock_p, c_int]
 lib.xdp_sock_recv.restype = c_int
 lib.xdp_sock_recv.argtypes = [xdp_sock_p, c_void_p, POINTER(c_size_t)]
+lib.xdp_sock_tx_batch_set_size.restype = c_int
+lib.xdp_sock_tx_batch_set_size.argtypes = [xdp_sock_p, c_int]
+lib.xdp_sock_tx_batch_release.restype = c_int
+lib.xdp_sock_tx_batch_release.argtypes = [xdp_sock_p, c_int]
+lib.xdp_sock_send.restype = c_int
+lib.xdp_sock_send.argtypes = [xdp_sock_p, c_void_p, c_size_t]
 lib.xdp_sock_test.restype = None
 lib.xdp_sock_test.argtypes = [c_bool]
 
@@ -234,23 +240,41 @@ class XdpSock(object):
         """
         return lib.xdp_sock_get_fd(self._as_parameter_)
 
-    def get_batch(self, pkts_recvd, nb):
+    def rx_batch_get_size(self, frames_recvd, nb):
         """
         Get batch
         """
-        return lib.xdp_sock_get_batch(self._as_parameter_, byref(c_int.from_param(pkts_recvd)), nb)
+        return lib.xdp_sock_rx_batch_get_size(self._as_parameter_, byref(c_int.from_param(frames_recvd)), nb)
 
-    def release_batch(self, pkts_recvd):
+    def rx_batch_release(self, frames_recvd):
         """
         Release batch
         """
-        return lib.xdp_sock_release_batch(self._as_parameter_, pkts_recvd)
+        return lib.xdp_sock_rx_batch_release(self._as_parameter_, frames_recvd)
 
     def recv(self, buffer, buffer_size):
         """
         Receive a packet from the batch
         """
         return lib.xdp_sock_recv(self._as_parameter_, buffer, byref(c_size_t.from_param(buffer_size)))
+
+    def tx_batch_set_size(self, nb):
+        """
+        Set batch size
+        """
+        return lib.xdp_sock_tx_batch_set_size(self._as_parameter_, nb)
+
+    def tx_batch_release(self, frames_send):
+        """
+        Release batch
+        """
+        return lib.xdp_sock_tx_batch_release(self._as_parameter_, frames_send)
+
+    def send(self, buffer, buffer_size):
+        """
+        Place a frame in the tx ring
+        """
+        return lib.xdp_sock_send(self._as_parameter_, buffer, buffer_size)
 
     @staticmethod
     def test(verbose):
