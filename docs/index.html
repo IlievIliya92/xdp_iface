@@ -26,7 +26,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Quickstart" href="quickstart.html" /> 
+    <link rel="next" title="QuickStart" href="quickstart.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -49,7 +49,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Usage</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">QuickStart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -88,8 +89,23 @@
              
   <section id="xdp-interface">
 <h1>XDP Interface<a class="headerlink" href="#xdp-interface" title="Permalink to this heading"></a></h1>
-<p>The purpouse of this documentation is to provide guidance on how to install and
-use the …</p>
+<p>The purpouse of this documentation is to provide guidance on how to install and use
+the xdpiface shared library.</p>
+<p>The project consits of:</p>
+<ul class="simple">
+<li><p>XDP interface library written in C</p></li>
+<li><p>Higher level language bindings: python3</p></li>
+<li><p>Cmake build system</p></li>
+<li><p>Documentaion</p></li>
+</ul>
+<section id="project-goals">
+<h2>Project Goals<a class="headerlink" href="#project-goals" title="Permalink to this heading"></a></h2>
+<p>The goal of the xdpiface is to provide an easy to use simple library which allows
+basic input/output of data over eBPF programs. It is based on the guidance and tutorials
+provided by the <a class="reference external" href="https://github.com/xdp-project">xdp-project</a>. Usefull information
+on the <code class="docutils literal notranslate"><span class="pre">libxdp</span></code> usage and its internals can be found <a class="reference external" href="https://www.mankier.com/3/libxdp">here</a>.
+Information on how to develop and use <code class="docutils literal notranslate"><span class="pre">eBPF</span></code> programs is available under the official Linux
+<a class="reference external" href="https://www.kernel.org/doc/html/latest/bpf/libbpf/index.html">kernel achives</a>.</p>
 <div class="toctree-wrapper compound">
 </div>
 <div class="toctree-wrapper compound">
@@ -97,12 +113,13 @@ use the …</p>
 <div class="toctree-wrapper compound">
 </div>
 </section>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="quickstart.html" class="btn btn-neutral float-right" title="Quickstart" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="quickstart.html" class="btn btn-neutral float-right" title="QuickStart" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

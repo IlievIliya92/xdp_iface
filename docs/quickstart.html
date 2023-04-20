@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quickstart &mdash; XDP Interface</title>
+  <title>QuickStart &mdash; XDP Interface</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
@@ -26,7 +26,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="next" title="API" href="api/index.html" />
     <link rel="prev" title="XDP Interface" href="index.html" /> 
 </head>
 
@@ -50,7 +50,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Usage</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">QuickStart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -78,7 +79,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Quickstart</li>
+      <li>QuickStart</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -88,28 +89,104 @@
            <div itemprop="articleBody">
              
   <section id="quickstart">
-<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this heading"></a></h1>
-<div class="sd-container-fluid sd-sphinx-override sd-p-0 sd-mt-2 sd-mb-4 docutils">
-<div class="sd-row sd-row-cols-2 sd-gx-2 sd-gy-1 docutils">
-<div class="sd-col sd-d-flex-row sd-align-minor-center docutils">
-<div class="sd-container-fluid sd-sphinx-override docutils">
-<div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-3 sd-row-cols-md-3 sd-row-cols-lg-3 sd-gx-3 sd-gy-1 docutils">
-<div class="sd-col sd-col-auto sd-d-flex-row sd-align-minor-center docutils">
-<p class="sd-p-0 sd-m-0"><span class="sd-pr-2"><svg version="1.1" width="16.0px" height="16.0px" class="sd-octicon sd-octicon-calendar" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M4.75 0a.75.75 0 01.75.75V2h5V.75a.75.75 0 011.5 0V2h1.25c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0113.25 16H2.75A1.75 1.75 0 011 14.25V3.75C1 2.784 1.784 2 2.75 2H4V.75A.75.75 0 014.75 0zm0 3.5h8.5a.25.25 0 01.25.25V6h-11V3.75a.25.25 0 01.25-.25h2zm-2.25 4v6.75c0 .138.112.25.25.25h10.5a.25.25 0 00.25-.25V7.5h-11z"></path></svg></span>Apr 16, 2023</p>
-</div>
-<div class="sd-col sd-col-auto sd-d-flex-row sd-align-minor-center docutils">
-<p class="sd-p-0 sd-m-0"><span class="sd-pr-2"><svg version="1.1" width="16.0px" height="16.0px" class="sd-octicon sd-octicon-clock" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zm.5 4.75a.75.75 0 00-1.5 0v3.5a.75.75 0 00.471.696l2.5 1a.75.75 0 00.557-1.392L8.5 7.742V4.75z"></path></svg></span>4 min read</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">QuickStart</a><a class="headerlink" href="#quickstart" title="Permalink to this heading"></a></h1>
+<nav class="contents" id="contents">
+<p class="topic-title">Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#quickstart" id="id1">QuickStart</a></p>
+<ul>
+<li><p><a class="reference internal" href="#dependencies" id="id2">Dependencies</a></p></li>
+<li><p><a class="reference internal" href="#initial-setup" id="id3">Initial Setup</a></p>
+<ul>
+<li><p><a class="reference internal" href="#build-install-xdpiface-lib" id="id4">Build &amp; install xdpiface lib</a></p></li>
+<li><p><a class="reference internal" href="#validate-the-installation" id="id5">Validate the installation</a></p></li>
+<li><p><a class="reference internal" href="#bindings-usage" id="id6">Bindings usage</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
 <section id="dependencies">
-<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Dependencies</a><a class="headerlink" href="#dependencies" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>libxp</p></li>
+<li><p>libbpf</p></li>
+</ul>
 </section>
 <section id="initial-setup">
-<h2>Initial Setup<a class="headerlink" href="#initial-setup" title="Permalink to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Initial Setup</a><a class="headerlink" href="#initial-setup" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Build &amp; install dependencies</p></li>
+</ol>
+<p>In order to build the <code class="docutils literal notranslate"><span class="pre">xdpiface</span></code> you would need to clone and install the <code class="docutils literal notranslate"><span class="pre">libxp</span></code>
+and <code class="docutils literal notranslate"><span class="pre">libbpf</span></code> shared libraries. For a Debian based machine you can start by following the instructions bellow:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>apt-get update
+<span class="gp">$ </span>apt-get install --no-install-recommends --no-install-suggests -y git clang llvm libelf-dev m4 libpcap-dev gcc-multilib build-essential cmake linux-tools-common linux-tools-generic linux-cloud-tools-generic linux-tools-5.19.0-38-generic linux-cloud-tools-5.19.0-38-generic pkg-config
+</pre></div>
+</div>
+<p>Additional and complete information on the setup can be found in the official <a class="reference external" href="https://github.com/xdp-project/xdp-tutorial/blob/master/setup_dependencies.org">xdp-tutorial</a></p>
+<p>To build &amp; install <code class="docutils literal notranslate"><span class="pre">libxp</span></code> and <code class="docutils literal notranslate"><span class="pre">libbpf</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git clone https://github.com/xdp-project/xdp-tools
+<span class="gp">$ </span><span class="nb">cd</span> xdp-tools
+<span class="gp">$ </span>git submodule init <span class="o">&amp;&amp;</span> git submodule update
+<span class="gp">$ </span>./configure
+<span class="gp">$ </span>make
+<span class="gp">$ </span>sudo make install
+<span class="gp">$ </span><span class="nb">cd</span> lib/libbpf/src
+<span class="gp">$ </span>sudo make install
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Note that `libbpf` build artefacts may be deployed in `/usr/lib64`.
+</pre></div>
+</div>
+</div>
+<p>To add <code class="docutils literal notranslate"><span class="pre">/usr/lib64</span></code> to the <code class="docutils literal notranslate"><span class="pre">LD_LIBRARY_PATH</span></code> use the following commands:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">export</span> <span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="nv">$LD_LIBRARY_PATH</span>:/usr/lib64/
+<span class="gp">$ </span>sudo ldconfig
+</pre></div>
+</div>
+<section id="build-install-xdpiface-lib">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">Build &amp; install xdpiface lib</a><a class="headerlink" href="#build-install-xdpiface-lib" title="Permalink to this heading"></a></h3>
+<p>The process to build and install the <code class="docutils literal notranslate"><span class="pre">xdpiface</span></code> is pretty standard for a cmake build
+system.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git https://github.com/IlievIliya92/xdp_iface.git
+<span class="gp">$ </span><span class="nb">cd</span> xdp_iface
+<span class="gp">$ </span>mkdir build
+<span class="gp">$ </span>cmake ..
+<span class="gp">$ </span>make
+<span class="gp">$ </span>sudo make install
+</pre></div>
+</div>
+</section>
+<section id="validate-the-installation">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">Validate the installation</a><a class="headerlink" href="#validate-the-installation" title="Permalink to this heading"></a></h3>
+<p>In the resulting <code class="docutils literal notranslate"><span class="pre">build</span></code> directory there should be a test application named: <code class="docutils literal notranslate"><span class="pre">xdpiface_app</span></code>
+This application simply loads the <code class="docutils literal notranslate"><span class="pre">xdp_sock_bpf.o</span></code> object to the <code class="docutils literal notranslate"><span class="pre">lo</span></code> interface and
+sends a batch of packets which is received and printed on the stdout. To run the application:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span> build
+<span class="gp">$ </span>sudo ./xdpiface_app
+</pre></div>
+</div>
+<p>To quit the application use <code class="docutils literal notranslate"><span class="pre">Ctrl</span> <span class="pre">+</span> <span class="pre">C</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>In order to load the bpf program and bind the xdp socket you would need administrative privileges.
+</pre></div>
+</div>
+</div>
+</section>
+<section id="bindings-usage">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">Bindings usage</a><a class="headerlink" href="#bindings-usage" title="Permalink to this heading"></a></h3>
+<p>To test the python bindings there is a similar software which resides in the
+<code class="docutils literal notranslate"><span class="pre">bindings/python/</span></code> directory. To run it use the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd bindings/python/</span>
+<span class="go">sudo python3 xdpiface_app.py</span>
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 
@@ -118,7 +195,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="XDP Interface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="api/index.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

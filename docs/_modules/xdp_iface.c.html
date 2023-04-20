@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>xdp_iface.c &mdash; XDP Interface</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/tabs.js"></script>
+        <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: rgba(52,49,49,1) 100%;" >
+            <a href="../index.html" class="icon icon-home"> XDP Interface
+          </a>
+              <div class="version">
+                v.1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">QuickStart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: rgba(52,49,49,1) 100%;" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">XDP Interface</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>xdp_iface.c</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for xdp_iface.c</h1><div class="highlight"><pre>
+<span></span><span class="cm">/*  =========================================================================</span>
+<span class="cm">    xdp_iface - class description</span>
+
+<span class="cm">    MIT License</span>
+
+<span class="cm">    Copyright (c) [2023] XDP Interface</span>
+
+<span class="cm">    Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="cm">    of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="cm">    in the Software without restriction, including without limitation the rights</span>
+<span class="cm">    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="cm">    copies of the Software, and to permit persons to whom the Software is</span>
+<span class="cm">    furnished to do so, subject to the following conditions:</span>
+
+<span class="cm">    The above copyright notice and this permission notice shall be included in all</span>
+<span class="cm">    copies or substantial portions of the Software.</span>
+
+<span class="cm">    THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="cm">    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="cm">    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="cm">    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="cm">    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="cm">    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="cm">    SOFTWARE.</span>
+<span class="cm">    =========================================================================</span>
+<span class="cm">*/</span><span class="w"></span>
+
+<span class="cm">/*</span>
+<span class="cm">@header</span>
+<span class="cm">    xdp_iface -</span>
+<span class="cm">@discuss</span>
+<span class="cm">@end</span>
+<span class="cm">*/</span><span class="w"></span>
+
+<span class="cm">/******************************** INCLUDE FILES *******************************/</span><span class="w"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;net/if.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;xdp/libxdp.h&gt;</span><span class="cp"></span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;xdp_log.h&quot;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;xdpiface_classes.h&quot;</span><span class="cp"></span>
+
+<div class="viewcode-block" id="c.XDP_MODULE_NAME"><span class="cm">/******************************** LOCAL DEFINES *******************************/</span><span class="w"></span>
+<span class="cp">#define XDP_MODULE_NAME &quot;xdp_iface&quot;</span></div>
+<div class="viewcode-block" id="c.XDP_IFACE_STRERR_BUFSIZE"><span class="cp">#define XDP_IFACE_STRERR_BUFSIZE          1024</span></div>
+
+<div class="viewcode-block" id="c._xdp_iface_t"><span class="cm">/********************************* TYPEDEFS ***********************************/</span><span class="w"></span>
+
+<span class="c1">//  Structure of xdp_iface class</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">_xdp_iface_t</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="viewcode-block" id="c._xdp_iface_t.ifindex"><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ifindex</span><span class="p">;</span><span class="w"></span></div>
+<div class="viewcode-block" id="c._xdp_iface_t.interface"><span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">interface</span><span class="p">;</span><span class="w"></span></div>
+
+<div class="viewcode-block" id="c._xdp_iface_t.attach_mode"><span class="w">    </span><span class="k">enum</span><span class="w"> </span><span class="n">xdp_attach_mode</span><span class="w"> </span><span class="n">attach_mode</span><span class="p">;</span><span class="w"></span></div>
+<div class="viewcode-block" id="c._xdp_iface_t.xdp_prog"><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">xdp_program</span><span class="w"> </span><span class="o">*</span><span class="n">xdp_prog</span><span class="p">;</span><span class="w"></span></div>
+<span class="p">};</span><span class="w"></span></div>
+
+<span class="cm">/********************************* LOCAL DATA *********************************/</span><span class="w"></span>
+
+<span class="cm">/******************************* LOCAL FUNCTIONS ******************************/</span><span class="w"></span>
+
+<span class="cm">/***************************** INTERFACE FUNCTIONS ****************************/</span><span class="w"></span>
+<span class="c1">//  --------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="c.xdp_iface_new"><a class="viewcode-back" href="../api/xdp_iface.html#c.xdp_iface_new">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Create new xdp_iface object.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *     On success new xdp_iface object, or NULL if the new xdp_iface could not be created.</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">*</span><span class="w"></span>
+<span class="nf">xdp_iface_new</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">interface</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">assert</span><span class="p">(</span><span class="n">interface</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">zmalloc</span><span class="w"> </span><span class="p">(</span><span class="k">sizeof</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_iface_t</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="n">assert</span><span class="w"> </span><span class="p">(</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">//  Initialize class properties here</span>
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">ifindex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">if_nametoindex</span><span class="p">(</span><span class="n">interface</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">ifindex</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Interface </span><span class="se">\&quot;</span><span class="s">%s</span><span class="se">\&quot;</span><span class="s"> does not exist</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">interface</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">free</span><span class="p">(</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">interface</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">strdup</span><span class="p">(</span><span class="n">interface</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="cm">/* Currently only skb mode is supported */</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">attach_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">XDP_MODE_SKB</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+
+<span class="c1">//  --------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="c.xdp_iface_destroy"><a class="viewcode-back" href="../api/xdp_iface.html#c.xdp_iface_destroy">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Destroy xdp_iface object. You must use this for any tcp server created via the</span>
+<span class="cm"> * xdp_iface_new method.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Parameters:</span>
+<span class="cm"> *      self_p (xdp_iface_t **): pointer to xdp_iface_t object reference,</span>
+<span class="cm"> *                               so the destructor can nullify it</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      None (void)</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kt">void</span><span class="w"></span>
+<span class="nf">xdp_iface_destroy</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">**</span><span class="n">self_p</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">assert</span><span class="w"> </span><span class="p">(</span><span class="n">self_p</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">self_p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">self_p</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//  Free class properties here</span>
+<span class="w">        </span><span class="n">free</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">interface</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//  Free object itself</span>
+<span class="w">        </span><span class="n">free</span><span class="w"> </span><span class="p">(</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="o">*</span><span class="n">self_p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+<div class="viewcode-block" id="c.xdp_iface_load_program"><a class="viewcode-back" href="../api/xdp_iface.html#c.xdp_iface_load_program">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Load eBPF program</span>
+<span class="cm"> *</span>
+<span class="cm"> * Parameters:</span>
+<span class="cm"> *      xdp_prog_path (const char *) Path to the compiled .o bpf object file</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      0 on success, err value on failiure</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kt">int</span><span class="w"></span>
+<span class="nf">xdp_iface_load_program</span><span class="p">(</span><span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">xdp_prog_path</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">errmsg</span><span class="p">[</span><span class="n">XDP_IFACE_STRERR_BUFSIZE</span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xdp_prog</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_program__open_file</span><span class="p">(</span><span class="n">xdp_prog_path</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">libxdp_get_error</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xdp_prog</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">libxdp_strerror</span><span class="p">(</span><span class="n">err</span><span class="p">,</span><span class="w"> </span><span class="n">errmsg</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">errmsg</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Program loading failed: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">errmsg</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_program__attach</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xdp_prog</span><span class="p">,</span><span class="w"> </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">ifindex</span><span class="p">,</span><span class="w"> </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">attach_mode</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">libxdp_strerror</span><span class="p">(</span><span class="n">err</span><span class="p">,</span><span class="w"> </span><span class="n">errmsg</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">errmsg</span><span class="p">));</span><span class="w"></span>
+<span class="w">            </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Attaching program failed: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">errmsg</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">err</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+
+<div class="viewcode-block" id="c.xdp_iface_unload_program"><a class="viewcode-back" href="../api/xdp_iface.html#c.xdp_iface_unload_program">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Unlooad eBPF program</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      None (void)</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kt">void</span><span class="w"></span>
+<span class="nf">xdp_iface_unload_program</span><span class="p">(</span><span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_program__detach</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xdp_prog</span><span class="p">,</span><span class="w"> </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">ifindex</span><span class="p">,</span><span class="w"> </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">attach_mode</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_program__close</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xdp_prog</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+<div class="viewcode-block" id="c.xdp_iface_get_name"><a class="viewcode-back" href="../api/xdp_iface.html#c.xdp_iface_get_name">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Get the network interfaces name associated to the xdp_iface object</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      RO string</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="w"></span>
+<span class="nf">xdp_iface_get_name</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">interface</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+
+<div class="viewcode-block" id="c.xdp_iface_get_prog"><a class="viewcode-back" href="../api/xdp_iface.html#c.xdp_iface_get_prog">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Get the loaded xdp program obejct</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      void pointer (Any)</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="w"></span>
+<span class="nf">xdp_iface_get_prog</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xdp_prog</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+<span class="c1">//  --------------------------------------------------------------------------</span>
+<span class="c1">//  Self test of this class</span>
+
+<span class="c1">// If your selftest reads SCMed fixture data, please keep it in</span>
+<span class="c1">// src/selftest-ro; if your test creates filesystem objects, please</span>
+<span class="c1">// do so under src/selftest-rw.</span>
+<span class="c1">// The following pattern is suggested for C selftest code:</span>
+<span class="c1">//    char *filename = NULL;</span>
+<span class="c1">//    filename = zsys_sprintf (&quot;%s/%s&quot;, SELFTEST_DIR_RO, &quot;mytemplate.file&quot;);</span>
+<span class="c1">//    assert (filename);</span>
+<span class="c1">//    ... use the &quot;filename&quot; for I/O ...</span>
+<span class="c1">//    zstr_free (&amp;filename);</span>
+<span class="c1">// This way the same &quot;filename&quot; variable can be reused for many subtests.</span>
+<div class="viewcode-block" id="c.SELFTEST_DIR_RO"><span class="cp">#define SELFTEST_DIR_RO &quot;src/selftest-ro&quot;</span></div>
+<div class="viewcode-block" id="c.SELFTEST_DIR_RW"><span class="cp">#define SELFTEST_DIR_RW &quot;src/selftest-rw&quot;</span></div>
+
+<div class="viewcode-block" id="c.xdp_iface_test"><span class="kt">void</span><span class="w"></span>
+<span class="nf">xdp_iface_test</span><span class="w"> </span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">verbose</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">xdp_prog_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;xdp_sock_bpf.o&quot;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_INFO</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; * xdp_iface: &quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">//  @selftest</span>
+<span class="w">    </span><span class="c1">//  Simple create/destroy test</span>
+<span class="w">    </span><span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_iface_new</span><span class="w"> </span><span class="p">(</span><span class="n">XDP_IFACE_DEFAULT</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">assert</span><span class="w"> </span><span class="p">(</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_iface_load_program</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">xdp_prog_path</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">ret</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Failed to load program (%s)!&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">xdp_prog_path</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">goto</span><span class="w"> </span><span class="n">exit</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_iface_unload_program</span><span class="p">(</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
+
+<span class="nl">exit</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_iface_destroy</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">//  @end</span>
+<span class="w">    </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_INFO</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;OK</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Iliya Iliev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

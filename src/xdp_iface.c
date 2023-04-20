@@ -118,6 +118,16 @@ xdp_iface_destroy (xdp_iface_t **self_p)
     }
 }
 
+/**
+ *
+ * Load eBPF program
+ *
+ * Parameters:
+ *      xdp_prog_path (const char *) Path to the compiled .o bpf object file
+ *
+ * Returns:
+ *      0 on success, err value on failiure
+ */
 int
 xdp_iface_load_program(xdp_iface_t *self, const char *xdp_prog_path)
 {
@@ -141,6 +151,14 @@ xdp_iface_load_program(xdp_iface_t *self, const char *xdp_prog_path)
     return err;
 }
 
+
+/**
+ *
+ * Unlooad eBPF program
+ *
+ * Returns:
+ *      None (void)
+ */
 void
 xdp_iface_unload_program(xdp_iface_t *self)
 {
@@ -148,12 +166,27 @@ xdp_iface_unload_program(xdp_iface_t *self)
     xdp_program__close(self->xdp_prog);
 }
 
+/**
+ *
+ * Get the network interfaces name associated to the xdp_iface object
+ *
+ * Returns:
+ *      RO string
+ */
 const char *
 xdp_iface_get_name (xdp_iface_t *self)
 {
     return self->interface;
 }
 
+
+/**
+ *
+ * Get the loaded xdp program obejct
+ *
+ * Returns:
+ *      void pointer (Any)
+ */
 void *
 xdp_iface_get_prog (xdp_iface_t *self)
 {

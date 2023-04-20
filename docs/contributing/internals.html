@@ -50,7 +50,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Usage</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">QuickStart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -98,10 +99,20 @@
 <h2>Repository Layout<a class="headerlink" href="#repository-layout" title="Permalink to this heading"></a></h2>
 <p>The repository layout is pretty standard for a ‘<a class="reference external" href="https://github.com/zeromq/zproject">zproject</a>’ based project.</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> – root CMake file</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">include/</span></code> – .so shard lib headers (interface)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sphinx_docs/</span></code> – Sources for the documentation.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">src/</span></code> – lib source</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">api</span></code> – Classes API description</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bindings</span></code> – Library bindings</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">builds</span></code> – Build system core compoments</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> – Root Cmake file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> – Dockerfile (used for builds only)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docs</span></code> – DOCs directory</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docs_src</span></code> – DOCs sources</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">include</span></code> – Shared lib headers</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">license.xml</span></code> – License file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">project_template.gsl</span></code> – root GSL template</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">project.xml</span></code> – Project GSL template</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">README.md</span></code> –</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src</span></code> – Shared lib source files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">xdp_sock_bpf</span></code> – eBPF source</p></li>
 </ul>
 </section>
 </section>

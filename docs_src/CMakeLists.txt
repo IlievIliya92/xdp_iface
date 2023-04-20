@@ -9,7 +9,9 @@ set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
 file(GLOB DOCS_FILES
     "${SPHINX_SOURCE}/*.rst"
     "${SPHINX_SOURCE}/*.md"
-    "${SPHINX_SOURCE}/contributing/*.md")
+    "${SPHINX_SOURCE}/contributing/*.md"
+    "${SPHINX_SOURCE}/contributing/*.md"
+    "${SPHINX_SOURCE}/api/*.rst")
 
 file(COPY ${SPHINX_SOURCE}/.nojekyll DESTINATION ${SPHINX_BUILD})
 

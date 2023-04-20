@@ -15,6 +15,11 @@
 import os
 import sys
 from xml.dom import minidom
+import clang.cindex as cl
+
+# clang-5
+cl.Config.set_library_file('/usr/lib/llvm-14/lib/libclang-14.so')
+cl.Config.set_library_path('/usr/lib/llvm-14/lib/libclang-14.so')
 
 # -- Project information -----------------------------------------------------
 
