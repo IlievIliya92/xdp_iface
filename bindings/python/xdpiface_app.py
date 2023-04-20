@@ -1,5 +1,7 @@
 import select
 import signal
+import time
+import threading
 
 import xdpiface
 
@@ -15,8 +17,27 @@ def sig_handler(sig, frame):
 
     STOP = True
 
+def send_frames(xdp_sock):
+    frame_size = 1500
+    batch_size = 30
+
+    o_buffer = create_string_buffer(frame_size)
+    o_buffer.raw = bytearray([0x55] * frame_size)
+    o_buffer_size = c_size_t(frame_size)
+
+    while True:
+        if STOP:
+            break
+
+        xdp_sock.tx_batch_set_size(batch_size);
+        for i in range(batch_size):
+            xdp_sock.send (o_buffer, o_buffer_size);
+        xdp_sock.tx_batch_release(batch_size);
+
+        time.sleep(0.01)
+
 def main():
-    batch_size = 64
+    batch_size = 30
 
     xdp_iface = xdpiface.XdpIface(XDP_IFACE)
     xdp_iface.load_program(XDP_SOCK_PROG)
@@ -35,10 +56,14 @@ def main():
     poller = select.poll()
     poller.register(xdp_sock_fd, select.POLLIN)
 
-    pkts_recvd = c_int(0)
+    frames_recd = c_int(0)
     i_buffer = create_string_buffer(9000)
     i_buffer_size = c_size_t(0)
 
+    thread = threading.Thread(target=send_frames, args=(xdp_sock, ));
+    thread.start()
+
+    frames_received = 0
     while True:
         if STOP:
             break
@@ -47,16 +72,18 @@ def main():
         for sock, evt in evts:
             if evt and select.POLLIN:
                 if sock == xdp_sock_fd:
-                    ret = xdp_sock.get_batch (pkts_recvd, batch_size);
+                    ret = xdp_sock.rx_batch_get_size (frames_recd, batch_size);
                     if ret:
                         continue
 
-                    for i in range(pkts_recvd.value):
+                    frames_received += frames_recd.value
+                    for i in range(frames_recd.value):
                         xdp_sock.recv (i_buffer, i_buffer_size)
-                        print(f"length: {i_buffer_size.value}")
+                        print(f"frame length: {i_buffer_size.value}, frames received: {frames_received}")
                         print(hexdump(i_buffer.raw[:i_buffer_size.value]))
-                    xdp_sock.release_batch(pkts_recvd.value);
+                    xdp_sock.rx_batch_release(frames_recd.value);
 
+    thread.join()
     xdp_iface.unload_program()
 
 class hexdump:
