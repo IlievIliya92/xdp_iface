@@ -18,8 +18,12 @@ def sig_handler(sig, frame):
     STOP = True
 
 def send_frames(xdp_sock):
+    global STOP
     frame_size = 1500
     batch_size = 30
+    batches_to_send = 100
+    batches_to_sent = 0
+    farmes_sent = 0
 
     o_buffer = create_string_buffer(frame_size)
     o_buffer.raw = bytearray([0x55] * frame_size)
@@ -29,12 +33,20 @@ def send_frames(xdp_sock):
         if STOP:
             break
 
+        if batches_to_send == batches_to_sent:
+            break
+
         xdp_sock.tx_batch_set_size(batch_size);
         for i in range(batch_size):
             xdp_sock.send (o_buffer, o_buffer_size);
         xdp_sock.tx_batch_release(batch_size);
+        farmes_sent += batch_size
+        batches_to_sent += 1
 
         time.sleep(0.01)
+
+    print(f"--- Batches sent: {batches_to_sent}, frames sent: {farmes_sent}")
+    STOP = True
 
 def main():
     batch_size = 30
@@ -79,8 +91,8 @@ def main():
                     frames_received += frames_recd.value
                     for i in range(frames_recd.value):
                         xdp_sock.recv (i_buffer, i_buffer_size)
-                        print(f"frame length: {i_buffer_size.value}, frames received: {frames_received}")
-                        print(hexdump(i_buffer.raw[:i_buffer_size.value]))
+                        print(f"--- Frame length: {i_buffer_size.value}, frames received: {frames_received}")
+                        # print(hexdump(i_buffer.raw[:i_buffer_size.value]))
                     xdp_sock.rx_batch_release(frames_recd.value);
 
     thread.join()
