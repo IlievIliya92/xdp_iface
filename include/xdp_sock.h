@@ -65,17 +65,32 @@ XDPIFACE_EXPORT int
 //  *** Draft method, for development use, may change without warning ***
 //  Get batch
 XDPIFACE_EXPORT int
-    xdp_sock_get_batch (xdp_sock_t *self, uint32_t *pkts_recvd, uint32_t nb);
+    xdp_sock_rx_batch_get_size (xdp_sock_t *self, uint32_t *frames_recvd, uint32_t nb);
 
 //  *** Draft method, for development use, may change without warning ***
 //  Release batch
 XDPIFACE_EXPORT int
-    xdp_sock_release_batch (xdp_sock_t *self, uint32_t pkts_recvd);
+    xdp_sock_rx_batch_release (xdp_sock_t *self, uint32_t frames_recvd);
 
 //  *** Draft method, for development use, may change without warning ***
 //  Receive a packet from the batch
 XDPIFACE_EXPORT int
     xdp_sock_recv (xdp_sock_t *self, char *buffer, size_t *buffer_size);
+
+//  *** Draft method, for development use, may change without warning ***
+//  Set batch size
+XDPIFACE_EXPORT int
+    xdp_sock_tx_batch_set_size (xdp_sock_t *self, uint32_t nb);
+
+//  *** Draft method, for development use, may change without warning ***
+//  Release batch
+XDPIFACE_EXPORT int
+    xdp_sock_tx_batch_release (xdp_sock_t *self, uint32_t frames_send);
+
+//  *** Draft method, for development use, may change without warning ***
+//  Place a frame in the tx ring
+XDPIFACE_EXPORT int
+    xdp_sock_send (xdp_sock_t *self, char *buffer, size_t buffer_size);
 
 //  *** Draft method, for development use, may change without warning ***
 //  Self test of this class.

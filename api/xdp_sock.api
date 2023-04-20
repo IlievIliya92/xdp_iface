@@ -30,16 +30,16 @@
         <return type="integer"/>
     </method>
 
-    <method name = "get_batch">
+    <method name = "rx_batch_get_size">
         Get batch
-        <argument name = "pkts_recvd" type = "number" size = "4" by_reference = "1" />
+        <argument name = "frames_recvd" type = "number" size = "4" by_reference = "1" />
         <argument name = "nb" type = "number" size = "4" />
         <return type="integer"/>
     </method>
 
-    <method name = "release_batch">
+    <method name = "rx_batch_release">
         Release batch
-        <argument name = "pkts_recvd" type = "number" size = "4" />
+        <argument name = "frames_recvd" type = "number" size = "4" />
         <return type="integer"/>
     </method>
 
@@ -47,6 +47,25 @@
         Receive a packet from the batch
         <argument name = "buffer" type = "buffer" mutable = "1"  c_type = "char *"/>
         <argument name = "buffer_size" type = "size" by_reference = "1" />
+        <return type="integer"/>
+    </method>
+
+    <method name = "tx_batch_set_size">
+        Set batch size
+        <argument name = "nb" type = "number" size = "4" />
+        <return type="integer"/>
+    </method>
+
+    <method name = "tx_batch_release">
+        Release batch
+        <argument name = "frames_send" type = "number" size = "4" />
+        <return type="integer"/>
+    </method>
+
+    <method name = "send">
+        Place a frame in the tx ring
+        <argument name = "buffer" type = "buffer" mutable = "1"  c_type = "char *"/>
+        <argument name = "buffer_size" type = "size" />
         <return type="integer"/>
     </method>
 

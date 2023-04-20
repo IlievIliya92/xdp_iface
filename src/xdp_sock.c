@@ -35,16 +35,12 @@
 /******************************** INCLUDE FILES *******************************/
 #include <errno.h>
 #include <unistd.h>
-#include <signal.h>
-#include <poll.h>
 #include <sys/mman.h>
 #include <sys/socket.h>
 #include <linux/if_link.h>
 
 #include <xdp/xsk.h>
 #include <xdp/libxdp.h>
-//#include <bpf/libbpf.h>
-#include <bpf/bpf.h>
 
 #include "xdp_log.h"
 #include "xdpiface_classes.h"
@@ -69,12 +65,14 @@ typedef struct _xsk_umem_info_t {
 //  Structure of xdp_sock class
 
 struct _xdp_sock_t {
+    __u32 idx_fq; /* producer queue */
     __u32 idx_rx;
-    __u32 idx_fq;
     struct xsk_ring_cons rx;
+    __u32 idx_tx;
+    __u32 idx_tx_batch;
     struct xsk_ring_prod tx;
+    __u32 pending_frames_tx;
     struct xsk_socket *xsk;
-    __u32 outstanding_tx;
 
     xsk_umem_info_t *umem;
     void *bufs;
@@ -84,7 +82,7 @@ struct _xdp_sock_t {
 
 /******************************* LOCAL FUNCTIONS ******************************/
 
-static xsk_umem_info_t *
+static inline xsk_umem_info_t *
 xdp_sock_xsk_configure_umem(void *buffer, __u64 buff_size)
 {
     xsk_umem_info_t *umem = NULL;
@@ -115,7 +113,7 @@ xdp_sock_xsk_configure_umem(void *buffer, __u64 buff_size)
     return umem;
 }
 
-static int
+static inline int
 xdp_sock_xsk_populate_fill_ring(xsk_umem_info_t *umem)
 {
     int ret = 0;
@@ -133,6 +131,29 @@ xdp_sock_xsk_populate_fill_ring(xsk_umem_info_t *umem)
     }
 
     return ret;
+}
+
+static inline void
+xdp_sock_tx_send_trigger(xdp_sock_t *self, int frames_send)
+{
+    __u32 idx;
+    unsigned int rcvd;
+    int ret = 0;
+
+    if (!self->pending_frames_tx)
+        return;
+
+    if (xsk_ring_prod__needs_wakeup(&self->tx)) {
+        ret = sendto(xsk_socket__fd(self->xsk), NULL, 0, MSG_DONTWAIT, NULL, 0);
+        if (ret != 0)
+            XDP_LOG_MSG(XDP_LOG_ERROR, "TX failed %s", strerror(errno));
+    }
+
+    rcvd = xsk_ring_cons__peek(&self->umem->cq, frames_send, &idx);
+    if (rcvd > 0) {
+        xsk_ring_cons__release(&self->umem->cq, rcvd);
+        self->pending_frames_tx -= rcvd;
+    }
 }
 
 /***************************** INTERFACE FUNCTIONS ****************************/
@@ -178,6 +199,11 @@ xdp_sock_new (xdp_iface_t *xdp_interface)
         free(self);
         return NULL;
     }
+
+    self->idx_fq = 0;
+    self->idx_tx = 0;
+    self->pending_frames_tx = 0;
+    self->idx_rx = 0;
 
     return self;
 }
@@ -293,14 +319,14 @@ xdp_sock_get_fd (xdp_sock_t *self)
 }
 
 int
-xdp_sock_get_batch (xdp_sock_t *self, uint32_t *pkts_recvd, uint32_t nb)
+xdp_sock_rx_batch_get_size (xdp_sock_t *self, uint32_t *frames_rcvd, uint32_t nb)
 {
     int ret = 0;
     self->idx_rx = 0;
     self->idx_fq = 0;
 
-    *pkts_recvd = xsk_ring_cons__peek(&self->rx, nb, &self->idx_rx);
-    if (0 == *pkts_recvd) {
+    *frames_rcvd = xsk_ring_cons__peek(&self->rx, nb, &self->idx_rx);
+    if (0 == *frames_rcvd) {
         if (xsk_ring_prod__needs_wakeup(&self->umem->fq)) {
             recvfrom(xsk_socket__fd(self->xsk), NULL, 0, MSG_DONTWAIT, NULL, NULL);
         }
@@ -308,28 +334,28 @@ xdp_sock_get_batch (xdp_sock_t *self, uint32_t *pkts_recvd, uint32_t nb)
         return -1;
     }
 
-    ret = xsk_ring_prod__reserve(&self->umem->fq, *pkts_recvd, &self->idx_fq);
-    while (ret != *pkts_recvd) {
+    ret = xsk_ring_prod__reserve(&self->umem->fq, *frames_rcvd, &self->idx_fq);
+    while (ret != *frames_rcvd) {
         if (ret < 0)
         {
-            XDP_LOG_MSG(XDP_LOG_ERROR, "Sock get batch failed....");
+            XDP_LOG_MSG(XDP_LOG_ERROR, "Sock get batch failed failed....");
             return -1;
         }
 
         if (xsk_ring_prod__needs_wakeup(&self->umem->fq)) {
             recvfrom(xsk_socket__fd(self->xsk), NULL, 0, MSG_DONTWAIT, NULL, NULL);
         }
-        ret = xsk_ring_prod__reserve(&self->umem->fq, *pkts_recvd, &self->idx_fq);
+        ret = xsk_ring_prod__reserve(&self->umem->fq, *frames_rcvd, &self->idx_fq);
     }
 
     return 0;
 }
 
 int
-xdp_sock_release_batch (xdp_sock_t *self, uint32_t pkts_recvd)
+xdp_sock_rx_batch_release (xdp_sock_t *self, uint32_t frames_rcvd)
 {
-    xsk_ring_prod__submit(&self->umem->fq, pkts_recvd);
-    xsk_ring_cons__release(&self->rx, pkts_recvd);
+    xsk_ring_prod__submit(&self->umem->fq, frames_rcvd);
+    xsk_ring_cons__release(&self->rx, frames_rcvd);
 
     return 0;
 }
@@ -348,6 +374,74 @@ xdp_sock_recv (xdp_sock_t *self, char *buffer, size_t *buffer_size)
     *xsk_ring_prod__fill_addr(&self->umem->fq, self->idx_fq++) = orig;
 }
 
+
+int
+xdp_sock_tx_batch_set_size (xdp_sock_t *self, uint32_t nb)
+{
+    int ret = 0;
+
+    while(xsk_ring_prod__reserve(&self->tx, nb, &self->idx_tx_batch) < nb) {
+        ret = sendto(xsk_socket__fd(self->xsk), NULL, 0, MSG_DONTWAIT, NULL, 0);
+        if (ret >= 0 || errno == ENOBUFS || errno == EAGAIN ||
+            errno == EBUSY || errno == ENETDOWN)
+            return -1;
+    }
+
+    return 0;
+}
+
+
+int
+xdp_sock_tx_batch_release (xdp_sock_t *self, uint32_t frames_send)
+{
+    int ret = 0;
+    int opt_retries = 3;
+    bool pending = false;
+
+    /**
+     * TODO: rework this part
+     */
+    xsk_ring_prod__submit(&self->tx, frames_send);
+    self->pending_frames_tx += frames_send;
+    xdp_sock_tx_send_trigger(self, frames_send);
+
+    if (self->pending_frames_tx)
+    {
+        do {
+            pending = false;
+            if (self->pending_frames_tx) {
+                xdp_sock_tx_send_trigger(self, frames_send);
+                pending = !!self->pending_frames_tx;
+            }
+            XDP_LOG_MSG(XDP_LOG_INFO, "Pending: %d", pending);
+        } while (pending && opt_retries-- > 0);
+    }
+    self->idx_tx = 0;
+
+    return ret;
+}
+
+int
+xdp_sock_send (xdp_sock_t *self, char *buffer, size_t buffer_size)
+{
+    if (self->idx_tx >= 64) {
+        XDP_LOG_MSG(XDP_LOG_WARNING, "TX batch full!");
+        return -1;
+    }
+    int ret = 0;
+
+
+    struct xdp_desc *tx_desc = xsk_ring_prod__tx_desc(&self->tx,
+                                  (self->idx_tx_batch + self->idx_tx));
+    tx_desc->addr = self->idx_tx * XDP_IFACE_XSK_FRAMESIZE;
+    tx_desc->len = buffer_size;
+
+    memcpy(xsk_umem__get_data(self->umem->buffer, tx_desc->addr), buffer, buffer_size);
+    self->idx_tx++;
+
+    return 0;
+}
+
 //  --------------------------------------------------------------------------
 //  Self test of this class
 
@@ -364,57 +458,14 @@ xdp_sock_recv (xdp_sock_t *self, char *buffer, size_t *buffer_size)
 #define SELFTEST_DIR_RO "src/selftest-ro"
 #define SELFTEST_DIR_RW "src/selftest-rw"
 
-static volatile sig_atomic_t stop = false;
-
-static void sig_handler(int sig)
-{
-    stop = true;
-}
-
-static void hex_dump(void *pkt, size_t length)
-{
-    const unsigned char *address = (unsigned char *)pkt;
-    const unsigned char *line = address;
-    size_t line_size = 32;
-    unsigned char c;
-    char buf[32];
-    int i = 0;
-
-    printf("length = %zu\n", length);
-    printf("%s | ", buf);
-    while (length-- > 0) {
-        printf("%02X ", *address++);
-        if (!(++i % line_size) || (length == 0 && i % line_size)) {
-            if (length == 0) {
-                while (i++ % line_size)
-                    printf("__ ");
-            }
-            printf(" | ");  /* right close */
-            while (line < address) {
-                c = *line++;
-                printf("%c", (c < 33 || c == 255) ? 0x2E : c);
-            }
-            printf("\n");
-            if (length > 0)
-                printf("%s | ", buf);
-        }
-    }
-    printf("\n");
-}
-
 void
 xdp_sock_test (bool verbose)
 {
-    struct pollfd fd;
     int ret = 0;
-    int i = 0;
 
     uint32_t batch_size = 64;
-    uint32_t pkts_recvd = 0;
+    uint32_t frames_rcvd = 0;
     const char *xdp_prog_path = "xdp_sock_bpf.o";
-
-    char i_buffer[9000];
-    size_t i_buffer_size = 0;
 
     XDP_LOG_MSG(XDP_LOG_INFO, " * xdp_sock: ");
 
@@ -434,32 +485,6 @@ xdp_sock_test (bool verbose)
     xdp_sock_set_sockopt(self, SO_PREFER_BUSY_POLL, 1);
     xdp_sock_set_sockopt(self, SO_BUSY_POLL, 20);
     xdp_sock_set_sockopt(self, SO_BUSY_POLL_BUDGET, batch_size);
-
-    signal(SIGINT, sig_handler);
-    signal(SIGTERM, sig_handler);
-
-    fd.fd = xdp_sock_get_fd(self);
-    fd.events = POLLIN;
-    for (;;) {
-        if (stop)
-            break;
-
-        ret = poll(&fd, 1, 1000);
-        if (ret <= 0)
-            continue;
-
-        ret = xdp_sock_get_batch (self, &pkts_recvd, batch_size);
-        if (0 != ret)
-            continue;
-
-        for (i = 0; i < pkts_recvd; i ++)
-        {
-            xdp_sock_recv (self, i_buffer, &i_buffer_size);
-            hex_dump(i_buffer, i_buffer_size);
-        }
-
-        xdp_sock_release_batch(self, pkts_recvd);
-    }
 
     xdp_sock_destroy (&self);
     xdp_iface_unload_program(xdp_iface);
