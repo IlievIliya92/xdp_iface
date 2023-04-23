@@ -372,6 +372,8 @@ xdp_sock_recv (xdp_sock_t *self, char *buffer, size_t *buffer_size)
     memcpy(buffer, xsk_umem__get_data(self->umem->buffer, addr), *buffer_size);
 
     *xsk_ring_prod__fill_addr(&self->umem->fq, self->idx_fq++) = orig;
+
+    return 0;
 }
 
 
