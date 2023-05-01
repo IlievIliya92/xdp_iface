@@ -9,3 +9,12 @@ add_custom_command(OUTPUT  ${EBPF_IFACE}.o
                    COMMAND clang ${CLANG_FLAGS} ${COMPILER_WARNING} -c ${CMAKE_CURRENT_SOURCE_DIR}/${EBPF_IFACE}.c -o ${EBPF_IFACE}.o
                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build)
 add_custom_target(${EBPF_IFACE}_target ALL DEPENDS ${EBPF_IFACE}.o)
+
+set (prefix "${CMAKE_INSTALL_PREFIX}")
+set (exec_prefix "\${prefix}")
+set (libdir "\${prefix}/lib${LIB_SUFFIX}")
+
+install(
+    FILES "${CMAKE_SOURCE_DIR}/build/${EBPF_IFACE}.o"
+    DESTINATION "${libdir}/bpf/"
+)
