@@ -2,6 +2,7 @@
     The xdp_iface class!
 
     <constant name = "DEFAULT" type="string" value = "lo">The default network interface</constant>
+    <constant name = "XDP_PROG_DEFAULT" type="string" value = "/usr/local/lib/bpf/xdp_sock_bpf.o">Default XDP program name</constant>
 
     <constructor>
         Create a new xdp iface

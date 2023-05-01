@@ -41,6 +41,9 @@ extern "C" {
 // The default network interface
 #define XDP_IFACE_DEFAULT "lo"
 
+// Default XDP program name
+#define XDP_IFACE_XDP_PROG_DEFAULT "/usr/local/lib/bpf/xdp_sock_bpf.o"
+
 //  *** Draft method, for development use, may change without warning ***
 //  Create a new xdp iface
 XDPIFACE_EXPORT xdp_iface_t *
