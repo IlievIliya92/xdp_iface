@@ -37,6 +37,19 @@ extern "C" {
 //  @interface
 //  This API is a draft, and may change without notice.
 #ifdef XDPIFACE_BUILD_DRAFT_API
+
+// The xsks map name
+#define XDP_SOCK_XSKS_MAP_DEFAULT "xsks_map"
+
+// Prefer busy poll
+#define XDP_SOCK_SO_PREFER_BUSY_POLL 69
+
+// Busy poll
+#define XDP_SOCK_SO_BUSY_POLL 36
+
+// Busy poll budget
+#define XDP_SOCK_SO_BUSY_POLL_BUDGET 70
+
 //  *** Draft method, for development use, may change without warning ***
 //  Create a new xdp socket
 XDPIFACE_EXPORT xdp_sock_t *

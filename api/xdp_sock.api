@@ -1,6 +1,11 @@
 <class name = "xdp_sock">
     The xdp_sock class!
 
+    <constant name = "XSKS_MAP_DEFAULT" type="string" value = "xsks_map">The xsks map name</constant>
+    <constant name = "SO_PREFER_BUSY_POLL" type="integer" value = "69">Prefer busy poll</constant>
+    <constant name = "SO_BUSY_POLL" type="integer" value = "36">Busy poll</constant>
+    <constant name = "SO_BUSY_POLL_BUDGET" type="integer" value = "70">Busy poll budget</constant>
+
     <constructor>
         Create a new xdp socket
         <argument name = "xdp_interface" type = "xdp_iface" />
