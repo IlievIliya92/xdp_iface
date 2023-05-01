@@ -234,9 +234,9 @@ xdp_sock_destroy (xdp_sock_t **self_p)
     if (*self_p) {
         xdp_sock_t *self = *self_p;
         //  Free class properties here
-        struct xsk_umem *umem = self->umem->umem;
         xsk_socket__delete(self->xsk);
-        (void)xsk_umem__delete(umem);
+        (void)xsk_umem__delete(self->umem->umem);
+        free(self->umem);
 
         munmap(self->bufs, XDP_IFACE_XSK_FRAMES * XDP_IFACE_XSK_FRAMESIZE);
         //  Free object itself
