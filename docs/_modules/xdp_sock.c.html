@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>xdp_sock.c &mdash; XDP Interface</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/tabs.js"></script>
+        <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: rgba(52,49,49,1) 100%;" >
+            <a href="../index.html" class="icon icon-home"> XDP Interface
+          </a>
+              <div class="version">
+                v.1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">QuickStart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: rgba(52,49,49,1) 100%;" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">XDP Interface</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>xdp_sock.c</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for xdp_sock.c</h1><div class="highlight"><pre>
+<span></span><span class="cm">/*  =========================================================================</span>
+<span class="cm">    xdp_sock - The xdp_sock class!</span>
+
+<span class="cm">    MIT License</span>
+
+<span class="cm">    Copyright (c) [2023] XDP Interface</span>
+
+<span class="cm">    Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="cm">    of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="cm">    in the Software without restriction, including without limitation the rights</span>
+<span class="cm">    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="cm">    copies of the Software, and to permit persons to whom the Software is</span>
+<span class="cm">    furnished to do so, subject to the following conditions:</span>
+
+<span class="cm">    The above copyright notice and this permission notice shall be included in all</span>
+<span class="cm">    copies or substantial portions of the Software.</span>
+
+<span class="cm">    THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="cm">    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="cm">    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="cm">    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="cm">    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="cm">    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="cm">    SOFTWARE.</span>
+<span class="cm">    =========================================================================</span>
+<span class="cm">*/</span><span class="w"></span>
+
+<span class="cm">/*</span>
+<span class="cm">@header</span>
+<span class="cm">    xdp_sock - The xdp_sock class!</span>
+<span class="cm">@discuss</span>
+<span class="cm">@end</span>
+<span class="cm">*/</span><span class="w"></span>
+
+<span class="cm">/******************************** INCLUDE FILES *******************************/</span><span class="w"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;errno.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;unistd.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;sys/mman.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;sys/socket.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/if_link.h&gt;</span><span class="cp"></span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;xdp/xsk.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;xdp/libxdp.h&gt;</span><span class="cp"></span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;xdp_log.h&quot;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;xdpiface_classes.h&quot;</span><span class="cp"></span>
+
+<div class="viewcode-block" id="c.XDP_MODULE_NAME"><span class="cm">/******************************** LOCAL DEFINES *******************************/</span><span class="w"></span>
+<span class="cp">#define XDP_MODULE_NAME &quot;xdp_sock&quot;</span></div>
+<div class="viewcode-block" id="c.MAX_SOCKS"><span class="cp">#define MAX_SOCKS 4</span></div>
+
+<div class="viewcode-block" id="c.XDP_IFACE_XSK_FRAMES"><span class="cp">#define XDP_IFACE_XSK_FRAMES              (4 * 4096)</span></div>
+<div class="viewcode-block" id="c.XDP_IFACE_XSK_FRAMESIZE"><span class="cp">#define XDP_IFACE_XSK_FRAMESIZE           (XSK_UMEM__DEFAULT_FRAME_SIZE)</span></div>
+
+
+<div class="viewcode-block" id="c._xsk_umem_info_t"><div class="viewcode-block" id="c.xsk_umem_info_t"><span class="cm">/********************************* TYPEDEFS ***********************************/</span><span class="w"></span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">_xsk_umem_info_t</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="viewcode-block" id="c._xsk_umem_info_t.fq"><div class="viewcode-block" id="c.xsk_umem_info_t.fq"><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">xsk_ring_prod</span><span class="w"> </span><span class="n">fq</span><span class="p">;</span><span class="w"></span></div></div>
+<div class="viewcode-block" id="c._xsk_umem_info_t.cq"><div class="viewcode-block" id="c.xsk_umem_info_t.cq"><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">xsk_ring_cons</span><span class="w"> </span><span class="n">cq</span><span class="p">;</span><span class="w"></span></div></div>
+<div class="viewcode-block" id="c._xsk_umem_info_t.umem"><div class="viewcode-block" id="c.xsk_umem_info_t.umem"><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">xsk_umem</span><span class="w"> </span><span class="o">*</span><span class="n">umem</span><span class="p">;</span><span class="w"></span></div></div>
+<div class="viewcode-block" id="c._xsk_umem_info_t.buffer"><div class="viewcode-block" id="c.xsk_umem_info_t.buffer"><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">buffer</span><span class="p">;</span><span class="w"></span></div></div>
+<span class="p">}</span><span class="w"> </span><span class="n">xsk_umem_info_t</span><span class="p">;</span><span class="w"></span></div></div>
+
+<span class="c1">//  Structure of xdp_sock class</span>
+
+<div class="viewcode-block" id="c._xdp_sock_t"><span class="k">struct</span><span class="w"> </span><span class="nc">_xdp_sock_t</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="viewcode-block" id="c._xdp_sock_t.idx_fq"><span class="w">    </span><span class="n">__u32</span><span class="w"> </span><span class="n">idx_fq</span><span class="p">;</span><span class="w"> </span><span class="cm">/* producer queue */</span><span class="w"></span></div>
+<div class="viewcode-block" id="c._xdp_sock_t.idx_rx"><span class="w">    </span><span class="n">__u32</span><span class="w"> </span><span class="n">idx_rx</span><span class="p">;</span><span class="w"></span></div>
+<div class="viewcode-block" id="c._xdp_sock_t.rx"><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">xsk_ring_cons</span><span class="w"> </span><span class="n">rx</span><span class="p">;</span><span class="w"></span></div>
+<div class="viewcode-block" id="c._xdp_sock_t.idx_tx"><span class="w">    </span><span class="n">__u32</span><span class="w"> </span><span class="n">idx_tx</span><span class="p">;</span><span class="w"></span></div>
+<div class="viewcode-block" id="c._xdp_sock_t.idx_tx_batch"><span class="w">    </span><span class="n">__u32</span><span class="w"> </span><span class="n">idx_tx_batch</span><span class="p">;</span><span class="w"></span></div>
+<div class="viewcode-block" id="c._xdp_sock_t.tx"><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">xsk_ring_prod</span><span class="w"> </span><span class="n">tx</span><span class="p">;</span><span class="w"></span></div>
+<div class="viewcode-block" id="c._xdp_sock_t.pending_frames_tx"><span class="w">    </span><span class="n">__u32</span><span class="w"> </span><span class="n">pending_frames_tx</span><span class="p">;</span><span class="w"></span></div>
+<div class="viewcode-block" id="c._xdp_sock_t.xsk"><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">xsk_socket</span><span class="w"> </span><span class="o">*</span><span class="n">xsk</span><span class="p">;</span><span class="w"></span></div>
+
+<div class="viewcode-block" id="c._xdp_sock_t.umem"><span class="w">    </span><span class="n">xsk_umem_info_t</span><span class="w"> </span><span class="o">*</span><span class="n">umem</span><span class="p">;</span><span class="w"></span></div>
+<div class="viewcode-block" id="c._xdp_sock_t.bufs"><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">bufs</span><span class="p">;</span><span class="w"></span></div>
+<span class="p">};</span><span class="w"></span></div>
+
+<span class="cm">/********************************* LOCAL DATA *********************************/</span><span class="w"></span>
+
+<div class="viewcode-block" id="c.xdp_sock_xsk_configure_umem"><span class="cm">/******************************* LOCAL FUNCTIONS ******************************/</span><span class="w"></span>
+
+<span class="k">static</span><span class="w"> </span><span class="kr">inline</span><span class="w"> </span><span class="n">xsk_umem_info_t</span><span class="w"> </span><span class="o">*</span><span class="w"></span>
+<span class="nf">xdp_sock_xsk_configure_umem</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">__u64</span><span class="w"> </span><span class="n">buff_size</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">xsk_umem_info_t</span><span class="w"> </span><span class="o">*</span><span class="n">umem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">xsk_umem_config</span><span class="w"> </span><span class="n">cfg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">fill_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">XSK_RING_PROD__DEFAULT_NUM_DESCS</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">comp_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">XSK_RING_CONS__DEFAULT_NUM_DESCS</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">frame_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">XDP_IFACE_XSK_FRAMESIZE</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">frame_headroom</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">XSK_UMEM__DEFAULT_FRAME_HEADROOM</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">flags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">umem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">calloc</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">umem</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">umem</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Memmory allocation failed! err: </span><span class="se">\&quot;</span><span class="s">%s</span><span class="se">\&quot;\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xsk_umem__create</span><span class="p">(</span><span class="o">&amp;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">umem</span><span class="p">,</span><span class="w"> </span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">buff_size</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">fq</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">cq</span><span class="p">,</span><span class="w"></span>
+<span class="w">                   </span><span class="o">&amp;</span><span class="n">cfg</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">ret</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;UMEM create failed! err: %d/</span><span class="se">\&quot;</span><span class="s">%s</span><span class="se">\&quot;\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ret</span><span class="p">,</span><span class="w"> </span><span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="n">free</span><span class="p">(</span><span class="n">umem</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">buffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">buffer</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">umem</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+<div class="viewcode-block" id="c.xdp_sock_xsk_populate_fill_ring"><span class="k">static</span><span class="w"> </span><span class="kr">inline</span><span class="w"> </span><span class="kt">int</span><span class="w"></span>
+<span class="nf">xdp_sock_xsk_populate_fill_ring</span><span class="p">(</span><span class="n">xsk_umem_info_t</span><span class="w"> </span><span class="o">*</span><span class="n">umem</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">__u32</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xsk_ring_prod__reserve</span><span class="p">(</span><span class="o">&amp;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">fq</span><span class="p">,</span><span class="w"></span>
+<span class="w">                     </span><span class="n">XSK_RING_PROD__DEFAULT_NUM_DESCS</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">idx</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">XSK_RING_PROD__DEFAULT_NUM_DESCS</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">ret</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Ring reserver failed! err: %d/</span><span class="se">\&quot;</span><span class="s">%s</span><span class="se">\&quot;\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ret</span><span class="p">,</span><span class="w"> </span><span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">XSK_RING_PROD__DEFAULT_NUM_DESCS</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="o">*</span><span class="n">xsk_ring_prod__fill_addr</span><span class="p">(</span><span class="o">&amp;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">fq</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">XDP_IFACE_XSK_FRAMESIZE</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">xsk_ring_prod__submit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">fq</span><span class="p">,</span><span class="w"> </span><span class="n">XSK_RING_PROD__DEFAULT_NUM_DESCS</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">ret</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+<div class="viewcode-block" id="c.xdp_sock_tx_send_trigger"><span class="k">static</span><span class="w"> </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="nf">xdp_sock_tx_send_trigger</span><span class="p">(</span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">frames_send</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">__u32</span><span class="w"> </span><span class="n">idx</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">rcvd</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">pending_frames_tx</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">xsk_ring_prod__needs_wakeup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">tx</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sendto</span><span class="p">(</span><span class="n">xsk_socket__fd</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xsk</span><span class="p">),</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">MSG_DONTWAIT</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;TX failed %s&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">rcvd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xsk_ring_cons__peek</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">cq</span><span class="p">,</span><span class="w"> </span><span class="n">frames_send</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">idx</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">rcvd</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">xsk_ring_cons__release</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">cq</span><span class="p">,</span><span class="w"> </span><span class="n">rcvd</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">pending_frames_tx</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">rcvd</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+<span class="cm">/***************************** INTERFACE FUNCTIONS ****************************/</span><span class="w"></span>
+
+<span class="c1">//  --------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="c.xdp_sock_new"><a class="viewcode-back" href="../api/xdp_sock.html#c.xdp_sock_new">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Create new xdp_sock object.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *     On success new xdp_sock object, or NULL if the new xdp_sock could not be created.</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="w"></span>
+<span class="nf">xdp_sock_new</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">*</span><span class="n">xdp_interface</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">assert</span><span class="p">(</span><span class="n">xdp_interface</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">xsk_socket_config</span><span class="w"> </span><span class="n">cfg</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">zmalloc</span><span class="w"> </span><span class="p">(</span><span class="k">sizeof</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_sock_t</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="n">assert</span><span class="w"> </span><span class="p">(</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">//  Initialize class properties here</span>
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">bufs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mmap</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">XDP_IFACE_XSK_FRAMES</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">XDP_IFACE_XSK_FRAMESIZE</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="n">PROT_READ</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PROT_WRITE</span><span class="p">,</span><span class="w"> </span><span class="n">MAP_PRIVATE</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">MAP_ANONYMOUS</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">bufs</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">MAP_FAILED</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;mmap failed</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">free</span><span class="p">(</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="cm">/* Create socket */</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">umem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_sock_xsk_configure_umem</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">bufs</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="n">XDP_IFACE_XSK_FRAMES</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">XDP_IFACE_XSK_FRAMESIZE</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock_xsk_populate_fill_ring</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">umem</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">cfg</span><span class="p">.</span><span class="n">rx_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">XSK_RING_CONS__DEFAULT_NUM_DESCS</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cfg</span><span class="p">.</span><span class="n">tx_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">XSK_RING_PROD__DEFAULT_NUM_DESCS</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cfg</span><span class="p">.</span><span class="n">libxdp_flags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cfg</span><span class="p">.</span><span class="n">xdp_flags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">XDP_FLAGS_SKB_MODE</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">cfg</span><span class="p">.</span><span class="n">bind_flags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">XDP_COPY</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">XDP_USE_NEED_WAKEUP</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xsk_socket__create</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xsk</span><span class="p">,</span><span class="w"> </span><span class="n">xdp_iface_get_name</span><span class="p">(</span><span class="n">xdp_interface</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">umem</span><span class="p">,</span><span class="w"></span>
+<span class="w">                 </span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">rx</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">tx</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cfg</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Failed to create socket! err: %d/</span><span class="se">\&quot;</span><span class="s">%s</span><span class="se">\&quot;\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ret</span><span class="p">,</span><span class="w"> </span><span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="cm">/** TODO: free res */</span><span class="w"></span>
+<span class="w">        </span><span class="n">free</span><span class="p">(</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_fq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_tx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">pending_frames_tx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_rx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+
+<span class="c1">//  --------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="c.xdp_sock_destroy"><a class="viewcode-back" href="../api/xdp_sock.html#c.xdp_sock_destroy">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Destroy xdp_sock object. You must use this for any tcp server created via the</span>
+<span class="cm"> * xdp_sock_new method.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Parameters:</span>
+<span class="cm"> *      self_p (xdp_sock_t **): pointer to xdp_sock_t object reference,</span>
+<span class="cm"> *                               so the destructor can nullify it</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      None (void)</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kt">void</span><span class="w"></span>
+<span class="nf">xdp_sock_destroy</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">**</span><span class="n">self_p</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">assert</span><span class="w"> </span><span class="p">(</span><span class="n">self_p</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">self_p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">self_p</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//  Free class properties here</span>
+<span class="w">        </span><span class="k">struct</span><span class="w"> </span><span class="nc">xsk_umem</span><span class="w"> </span><span class="o">*</span><span class="n">umem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">umem</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">xsk_socket__delete</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xsk</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">xsk_umem__delete</span><span class="p">(</span><span class="n">umem</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">munmap</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">bufs</span><span class="p">,</span><span class="w"> </span><span class="n">XDP_IFACE_XSK_FRAMES</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">XDP_IFACE_XSK_FRAMESIZE</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//  Free object itself</span>
+<span class="w">        </span><span class="n">free</span><span class="w"> </span><span class="p">(</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="o">*</span><span class="n">self_p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+<div class="viewcode-block" id="c.xdp_sock_lookup_bpf_map"><a class="viewcode-back" href="../api/xdp_sock.html#c.xdp_sock_lookup_bpf_map">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Attach XSKS map to socket fd</span>
+<span class="cm"> *</span>
+<span class="cm"> * Parameters:</span>
+<span class="cm"> *      self_p (xdp_sock_t *): pointer to xdp_sock_t object</span>
+<span class="cm"> *      xdp_interface (xdp_iface_t *): pointer to xdp_iface_t object</span>
+<span class="cm"> *      map_name (const char *): map name</span>
+<span class="cm"> *      key_size (uint32_t): map keys size</span>
+<span class="cm"> *      value_size (uint32_t): map values size</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      0 on success, err value on failiure</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kt">int</span><span class="w"></span>
+<span class="nf">xdp_sock_lookup_bpf_map</span><span class="p">(</span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">*</span><span class="n">xdp_interface</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">map_name</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">key_size</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">value_size</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">xdp_program</span><span class="w"> </span><span class="o">*</span><span class="n">xdp_prog</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">xdp_program</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">xdp_iface_get_prog</span><span class="p">(</span><span class="n">xdp_interface</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">__u32</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">__u32</span><span class="w"> </span><span class="o">*</span><span class="n">map_ids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">__u32</span><span class="w"> </span><span class="n">num_maps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">__u32</span><span class="w"> </span><span class="n">prog_len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">bpf_prog_info</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">__u32</span><span class="w"> </span><span class="n">map_len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">bpf_map_info</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">bpf_prog_info</span><span class="w"> </span><span class="n">prog_info</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{};</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">fd</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">,</span><span class="w"> </span><span class="n">xsks_map_fd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">ENOENT</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">bpf_map_info</span><span class="w"> </span><span class="n">map_info</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">sock_fd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">xdp_prog_fd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_prog_fd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_program__fd</span><span class="p">(</span><span class="n">xdp_prog</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bpf_obj_get_info_by_fd</span><span class="p">(</span><span class="n">xdp_prog_fd</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">prog_info</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">prog_len</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">err</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">num_maps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prog_info</span><span class="p">.</span><span class="n">nr_map_ids</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">map_ids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">calloc</span><span class="p">(</span><span class="n">prog_info</span><span class="p">.</span><span class="n">nr_map_ids</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">map_ids</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">map_ids</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">ENOMEM</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">prog_info</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">prog_len</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">prog_info</span><span class="p">.</span><span class="n">nr_map_ids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">num_maps</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">prog_info</span><span class="p">.</span><span class="n">map_ids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">__u64</span><span class="p">)(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="p">)</span><span class="n">map_ids</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bpf_obj_get_info_by_fd</span><span class="p">(</span><span class="n">xdp_prog_fd</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">prog_info</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">prog_len</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">free</span><span class="p">(</span><span class="n">map_ids</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">err</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">prog_info</span><span class="p">.</span><span class="n">nr_map_ids</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">fd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bpf_map_get_fd_by_id</span><span class="p">(</span><span class="n">map_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">fd</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="k">continue</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">map_info</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">map_len</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bpf_obj_get_info_by_fd</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">map_info</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">map_len</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="k">continue</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">strncmp</span><span class="p">(</span><span class="n">map_info</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">map_name</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">map_info</span><span class="p">.</span><span class="n">name</span><span class="p">))</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"></span>
+<span class="w">            </span><span class="n">map_info</span><span class="p">.</span><span class="n">key_size</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">key_size</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">map_info</span><span class="p">.</span><span class="n">value_size</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">value_size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">xsks_map_fd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fd</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">free</span><span class="p">(</span><span class="n">map_ids</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">xsks_map_fd</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;No xsks map found: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">strerror</span><span class="p">(</span><span class="n">xsks_map_fd</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">sock_fd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xsk_socket__fd</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xsk</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">bpf_map_update_elem</span><span class="p">(</span><span class="n">xsks_map_fd</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fd</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+
+<div class="viewcode-block" id="c.xdp_sock_set_sockopt"><a class="viewcode-back" href="../api/xdp_sock.html#c.xdp_sock_set_sockopt">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Set socket option</span>
+<span class="cm"> *</span>
+<span class="cm"> * Parameters:</span>
+<span class="cm"> *      self_p (xdp_sock_t *): pointer to xdp_sock_t object</span>
+<span class="cm"> *      opt_type (int): option type</span>
+<span class="cm"> *      opt_value (int): option value</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      0 on success, err value on failiure</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kt">int</span><span class="w"></span>
+<span class="nf">xdp_sock_set_sockopt</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">opt_type</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">opt_value</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">setsockopt</span><span class="p">(</span><span class="n">xsk_socket__fd</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xsk</span><span class="p">),</span><span class="w"> </span><span class="n">SOL_SOCKET</span><span class="p">,</span><span class="w"> </span><span class="n">opt_type</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">opt_value</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">opt_value</span><span class="p">));</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">ret</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+
+<div class="viewcode-block" id="c.xdp_sock_get_fd"><a class="viewcode-back" href="../api/xdp_sock.html#c.xdp_sock_get_fd">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Get socket descriptor</span>
+<span class="cm"> *</span>
+<span class="cm"> * Parameters:</span>
+<span class="cm"> *      self_p (xdp_sock_t *): pointer to xdp_sock_t object</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      socket descriptor</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kt">int</span><span class="w"></span>
+<span class="nf">xdp_sock_get_fd</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">xsk_socket__fd</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xsk</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+<div class="viewcode-block" id="c.xdp_sock_rx_batch_get_size"><a class="viewcode-back" href="../api/xdp_sock.html#c.xdp_sock_rx_batch_get_size">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Get size, number of frames received</span>
+<span class="cm"> *</span>
+<span class="cm"> * Parameters:</span>
+<span class="cm"> *      self_p (xdp_sock_t *): pointer to xdp_sock_t object</span>
+<span class="cm"> *      frames_rcvd (uint32_t *): number of received frames</span>
+<span class="cm"> *      nb (uint32_t): maximum number of frames to receive</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      0 on success, -1 on failiure</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kt">int</span><span class="w"></span>
+<span class="nf">xdp_sock_rx_batch_get_size</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="o">*</span><span class="n">frames_rcvd</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nb</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_rx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_fq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="o">*</span><span class="n">frames_rcvd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xsk_ring_cons__peek</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">rx</span><span class="p">,</span><span class="w"> </span><span class="n">nb</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_rx</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">*</span><span class="n">frames_rcvd</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">xsk_ring_prod__needs_wakeup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">fq</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">recvfrom</span><span class="p">(</span><span class="n">xsk_socket__fd</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xsk</span><span class="p">),</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">MSG_DONTWAIT</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xsk_ring_prod__reserve</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">fq</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">frames_rcvd</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_fq</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="o">*</span><span class="n">frames_rcvd</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Sock get batch failed failed....&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">xsk_ring_prod__needs_wakeup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">fq</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">recvfrom</span><span class="p">(</span><span class="n">xsk_socket__fd</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xsk</span><span class="p">),</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">MSG_DONTWAIT</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xsk_ring_prod__reserve</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">fq</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">frames_rcvd</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_fq</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+<div class="viewcode-block" id="c.xdp_sock_rx_batch_release"><a class="viewcode-back" href="../api/xdp_sock.html#c.xdp_sock_rx_batch_release">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Release received batch</span>
+<span class="cm"> *</span>
+<span class="cm"> * Parameters:</span>
+<span class="cm"> *      self_p (xdp_sock_t *): pointer to xdp_sock_t object</span>
+<span class="cm"> *      frames_rcvd (uint32_t): number of received frames to release</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      0 on success</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kt">int</span><span class="w"></span>
+<span class="nf">xdp_sock_rx_batch_release</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">frames_rcvd</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">xsk_ring_prod__submit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">fq</span><span class="p">,</span><span class="w"> </span><span class="n">frames_rcvd</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xsk_ring_cons__release</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">rx</span><span class="p">,</span><span class="w"> </span><span class="n">frames_rcvd</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+
+<div class="viewcode-block" id="c.xdp_sock_recv"><a class="viewcode-back" href="../api/xdp_sock.html#c.xdp_sock_recv">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Read/receive a frame from the RX batch</span>
+<span class="cm"> *</span>
+<span class="cm"> * Parameters:</span>
+<span class="cm"> *      self_p (xdp_sock_t *): pointer to xdp_sock_t object</span>
+<span class="cm"> *      buffer (char *): receive buffer</span>
+<span class="cm"> *      buffer_size (size_t *): size of the received buffer</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      0 on success</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kt">int</span><span class="w"></span>
+<span class="nf">xdp_sock_recv</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">buffer_size</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">__u64</span><span class="w"> </span><span class="n">addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xsk_ring_cons__rx_desc</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">rx</span><span class="p">,</span><span class="w"> </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_rx</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">addr</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">*</span><span class="n">buffer_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xsk_ring_cons__rx_desc</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">rx</span><span class="p">,</span><span class="w"> </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_rx</span><span class="o">++</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">len</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">__u64</span><span class="w"> </span><span class="n">orig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xsk_umem__extract_addr</span><span class="p">(</span><span class="n">addr</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xsk_umem__add_offset_to_addr</span><span class="p">(</span><span class="n">addr</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="cm">/* This can be avoided but it will be tricky to pass data through python bindings */</span><span class="w"></span>
+<span class="w">    </span><span class="n">memcpy</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">xsk_umem__get_data</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">addr</span><span class="p">),</span><span class="w"> </span><span class="o">*</span><span class="n">buffer_size</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="o">*</span><span class="n">xsk_ring_prod__fill_addr</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">fq</span><span class="p">,</span><span class="w"> </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_fq</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">orig</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+
+<div class="viewcode-block" id="c.xdp_sock_tx_batch_set_size"><a class="viewcode-back" href="../api/xdp_sock.html#c.xdp_sock_tx_batch_set_size">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Set size of the TX batch</span>
+<span class="cm"> *</span>
+<span class="cm"> * Parameters:</span>
+<span class="cm"> *      self_p (xdp_sock_t *): pointer to xdp_sock_t object</span>
+<span class="cm"> *      nb (uint32_t): number of slots to prepare in the tx ring</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      0 on success, -1 on failiure</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kt">int</span><span class="w"></span>
+<span class="nf">xdp_sock_tx_batch_set_size</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nb</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">while</span><span class="p">(</span><span class="n">xsk_ring_prod__reserve</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">tx</span><span class="p">,</span><span class="w"> </span><span class="n">nb</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_tx_batch</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">nb</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sendto</span><span class="p">(</span><span class="n">xsk_socket__fd</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">xsk</span><span class="p">),</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">MSG_DONTWAIT</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">errno</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">ENOBUFS</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">errno</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">EAGAIN</span><span class="w"> </span><span class="o">||</span><span class="w"></span>
+<span class="w">            </span><span class="n">errno</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">EBUSY</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">errno</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">ENETDOWN</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+
+<div class="viewcode-block" id="c.xdp_sock_tx_batch_release"><a class="viewcode-back" href="../api/xdp_sock.html#c.xdp_sock_tx_batch_release">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Trigger send of the frames in the TX batch</span>
+<span class="cm"> *</span>
+<span class="cm"> * Parameters:</span>
+<span class="cm"> *      self_p (xdp_sock_t *): pointer to xdp_sock_t object</span>
+<span class="cm"> *      frames_send (uint32_t): number of frames to send</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      0 on success</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kt">int</span><span class="w"></span>
+<span class="nf">xdp_sock_tx_batch_release</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">frames_send</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">opt_retries</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * TODO: rework this part</span>
+<span class="cm">     */</span><span class="w"></span>
+<span class="w">    </span><span class="n">xsk_ring_prod__submit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">tx</span><span class="p">,</span><span class="w"> </span><span class="n">frames_send</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">pending_frames_tx</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">frames_send</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock_tx_send_trigger</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">frames_send</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">pending_frames_tx</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">do</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">pending</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">pending_frames_tx</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">xdp_sock_tx_send_trigger</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">frames_send</span><span class="p">);</span><span class="w"></span>
+<span class="w">                </span><span class="n">pending</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!!</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">pending_frames_tx</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_INFO</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Pending: %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">pending</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">opt_retries</span><span class="o">--</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_tx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+<div class="viewcode-block" id="c.xdp_sock_send"><a class="viewcode-back" href="../api/xdp_sock.html#c.xdp_sock_send">[docs]</a><span class="cm">/**</span>
+<span class="cm"> *</span>
+<span class="cm"> * Send/place a frame in the TX ring</span>
+<span class="cm"> *</span>
+<span class="cm"> * Parameters:</span>
+<span class="cm"> *      self_p (xdp_sock_t *): pointer to xdp_sock_t object</span>
+<span class="cm"> *      buffer (char *): buffer to send</span>
+<span class="cm"> *      buffer_size (size_t): size of the buffer to send</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns:</span>
+<span class="cm"> *      0 on success</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kt">int</span><span class="w"></span>
+<span class="nf">xdp_sock_send</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">buffer_size</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_tx</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">64</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_WARNING</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;TX batch full!&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">xdp_desc</span><span class="w"> </span><span class="o">*</span><span class="n">tx_desc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xsk_ring_prod__tx_desc</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">tx</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                  </span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_tx_batch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_tx</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="n">tx_desc</span><span class="o">-&gt;</span><span class="n">addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_tx</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">XDP_IFACE_XSK_FRAMESIZE</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">tx_desc</span><span class="o">-&gt;</span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">buffer_size</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">memcpy</span><span class="p">(</span><span class="n">xsk_umem__get_data</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">umem</span><span class="o">-&gt;</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">tx_desc</span><span class="o">-&gt;</span><span class="n">addr</span><span class="p">),</span><span class="w"> </span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">buffer_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="o">-&gt;</span><span class="n">idx_tx</span><span class="o">++</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+
+<span class="c1">//  --------------------------------------------------------------------------</span>
+<span class="c1">//  Self test of this class</span>
+
+<span class="c1">// If your selftest reads SCMed fixture data, please keep it in</span>
+<span class="c1">// src/selftest-ro; if your test creates filesystem objects, please</span>
+<span class="c1">// do so under src/selftest-rw.</span>
+<span class="c1">// The following pattern is suggested for C selftest code:</span>
+<span class="c1">//    char *filename = NULL;</span>
+<span class="c1">//    filename = zsys_sprintf (&quot;%s/%s&quot;, SELFTEST_DIR_RO, &quot;mytemplate.file&quot;);</span>
+<span class="c1">//    assert (filename);</span>
+<span class="c1">//    ... use the &quot;filename&quot; for I/O ...</span>
+<span class="c1">//    zstr_free (&amp;filename);</span>
+<span class="c1">// This way the same &quot;filename&quot; variable can be reused for many subtests.</span>
+<div class="viewcode-block" id="c.SELFTEST_DIR_RO"><span class="cp">#define SELFTEST_DIR_RO &quot;src/selftest-ro&quot;</span></div>
+<div class="viewcode-block" id="c.SELFTEST_DIR_RW"><span class="cp">#define SELFTEST_DIR_RW &quot;src/selftest-rw&quot;</span></div>
+
+<div class="viewcode-block" id="c.xdp_sock_test"><span class="kt">void</span><span class="w"></span>
+<span class="nf">xdp_sock_test</span><span class="w"> </span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">verbose</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">batch_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">64</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">frames_rcvd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">xdp_prog_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;xdp_sock_bpf.o&quot;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_INFO</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; * xdp_sock: &quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">//  @selftest</span>
+<span class="w">    </span><span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">*</span><span class="n">xdp_iface</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_iface_new</span><span class="w"> </span><span class="p">(</span><span class="n">XDP_IFACE_DEFAULT</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">assert</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_iface</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_iface_load_program</span><span class="p">(</span><span class="n">xdp_iface</span><span class="p">,</span><span class="w"> </span><span class="n">xdp_prog_path</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">ret</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Failed to load program (%s)!&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">xdp_prog_path</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">goto</span><span class="w"> </span><span class="n">exit</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_sock_new</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_iface</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock_lookup_bpf_map</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">xdp_iface</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;xsks_map&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_sock_set_sockopt</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">SO_PREFER_BUSY_POLL</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock_set_sockopt</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">SO_BUSY_POLL</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock_set_sockopt</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">SO_BUSY_POLL_BUDGET</span><span class="p">,</span><span class="w"> </span><span class="n">batch_size</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_sock_destroy</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_iface_unload_program</span><span class="p">(</span><span class="n">xdp_iface</span><span class="p">);</span><span class="w"></span>
+<span class="nl">exit</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_iface_destroy</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">xdp_iface</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">//  @end</span>
+<span class="w">    </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_INFO</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;OK</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Iliya Iliev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -159,8 +159,13 @@ xdp_sock_tx_send_trigger(xdp_sock_t *self, int frames_send)
 /***************************** INTERFACE FUNCTIONS ****************************/
 
 //  --------------------------------------------------------------------------
-//  Create a new xdp_sock
-
+/**
+ *
+ * Create new xdp_sock object.
+ *
+ * Returns:
+ *     On success new xdp_sock object, or NULL if the new xdp_sock could not be created.
+ */
 xdp_sock_t *
 xdp_sock_new (xdp_iface_t *xdp_interface)
 {
@@ -210,8 +215,18 @@ xdp_sock_new (xdp_iface_t *xdp_interface)
 
 
 //  --------------------------------------------------------------------------
-//  Destroy the xdp_sock
-
+/**
+ *
+ * Destroy xdp_sock object. You must use this for any tcp server created via the
+ * xdp_sock_new method.
+ *
+ * Parameters:
+ *      self_p (xdp_sock_t **): pointer to xdp_sock_t object reference,
+ *                               so the destructor can nullify it
+ *
+ * Returns:
+ *      None (void)
+ */
 void
 xdp_sock_destroy (xdp_sock_t **self_p)
 {
@@ -230,6 +245,20 @@ xdp_sock_destroy (xdp_sock_t **self_p)
     }
 }
 
+/**
+ *
+ * Attach XSKS map to socket fd
+ *
+ * Parameters:
+ *      self_p (xdp_sock_t *): pointer to xdp_sock_t object
+ *      xdp_interface (xdp_iface_t *): pointer to xdp_iface_t object
+ *      map_name (const char *): map name
+ *      key_size (uint32_t): map keys size
+ *      value_size (uint32_t): map values size
+ *
+ * Returns:
+ *      0 on success, err value on failiure
+ */
 int
 xdp_sock_lookup_bpf_map(xdp_sock_t *self, xdp_iface_t *xdp_interface, const char *map_name,
     uint32_t key_size, uint32_t value_size)
@@ -301,6 +330,19 @@ xdp_sock_lookup_bpf_map(xdp_sock_t *self, xdp_iface_t *xdp_interface, const char
     return 0;
 }
 
+
+/**
+ *
+ * Set socket option
+ *
+ * Parameters:
+ *      self_p (xdp_sock_t *): pointer to xdp_sock_t object
+ *      opt_type (int): option type
+ *      opt_value (int): option value
+ *
+ * Returns:
+ *      0 on success, err value on failiure
+ */
 int
 xdp_sock_set_sockopt (xdp_sock_t *self, int opt_type, int opt_value)
 {
@@ -312,12 +354,35 @@ xdp_sock_set_sockopt (xdp_sock_t *self, int opt_type, int opt_value)
     return ret;
 }
 
+
+/**
+ *
+ * Get socket descriptor
+ *
+ * Parameters:
+ *      self_p (xdp_sock_t *): pointer to xdp_sock_t object
+ *
+ * Returns:
+ *      socket descriptor
+ */
 int
 xdp_sock_get_fd (xdp_sock_t *self)
 {
     return xsk_socket__fd(self->xsk);
 }
 
+/**
+ *
+ * Get size, number of frames received
+ *
+ * Parameters:
+ *      self_p (xdp_sock_t *): pointer to xdp_sock_t object
+ *      frames_rcvd (uint32_t *): number of received frames
+ *      nb (uint32_t): maximum number of frames to receive
+ *
+ * Returns:
+ *      0 on success, -1 on failiure
+ */
 int
 xdp_sock_rx_batch_get_size (xdp_sock_t *self, uint32_t *frames_rcvd, uint32_t nb)
 {
@@ -351,6 +416,17 @@ xdp_sock_rx_batch_get_size (xdp_sock_t *self, uint32_t *frames_rcvd, uint32_t nb
     return 0;
 }
 
+/**
+ *
+ * Release received batch
+ *
+ * Parameters:
+ *      self_p (xdp_sock_t *): pointer to xdp_sock_t object
+ *      frames_rcvd (uint32_t): number of received frames to release
+ *
+ * Returns:
+ *      0 on success
+ */
 int
 xdp_sock_rx_batch_release (xdp_sock_t *self, uint32_t frames_rcvd)
 {
@@ -360,6 +436,19 @@ xdp_sock_rx_batch_release (xdp_sock_t *self, uint32_t frames_rcvd)
     return 0;
 }
 
+
+/**
+ *
+ * Read/receive a frame from the RX batch
+ *
+ * Parameters:
+ *      self_p (xdp_sock_t *): pointer to xdp_sock_t object
+ *      buffer (char *): receive buffer
+ *      buffer_size (size_t *): size of the received buffer
+ *
+ * Returns:
+ *      0 on success
+ */
 int
 xdp_sock_recv (xdp_sock_t *self, char *buffer, size_t *buffer_size)
 {
@@ -377,6 +466,17 @@ xdp_sock_recv (xdp_sock_t *self, char *buffer, size_t *buffer_size)
 }
 
 
+/**
+ *
+ * Set size of the TX batch
+ *
+ * Parameters:
+ *      self_p (xdp_sock_t *): pointer to xdp_sock_t object
+ *      nb (uint32_t): number of slots to prepare in the tx ring
+ *
+ * Returns:
+ *      0 on success, -1 on failiure
+ */
 int
 xdp_sock_tx_batch_set_size (xdp_sock_t *self, uint32_t nb)
 {
@@ -393,10 +493,20 @@ xdp_sock_tx_batch_set_size (xdp_sock_t *self, uint32_t nb)
 }
 
 
+/**
+ *
+ * Trigger send of the frames in the TX batch
+ *
+ * Parameters:
+ *      self_p (xdp_sock_t *): pointer to xdp_sock_t object
+ *      frames_send (uint32_t): number of frames to send
+ *
+ * Returns:
+ *      0 on success
+ */
 int
 xdp_sock_tx_batch_release (xdp_sock_t *self, uint32_t frames_send)
 {
-    int ret = 0;
     int opt_retries = 3;
     bool pending = false;
 
@@ -420,9 +530,21 @@ xdp_sock_tx_batch_release (xdp_sock_t *self, uint32_t frames_send)
     }
     self->idx_tx = 0;
 
-    return ret;
+    return 0;
 }
 
+/**
+ *
+ * Send/place a frame in the TX ring
+ *
+ * Parameters:
+ *      self_p (xdp_sock_t *): pointer to xdp_sock_t object
+ *      buffer (char *): buffer to send
+ *      buffer_size (size_t): size of the buffer to send
+ *
+ * Returns:
+ *      0 on success
+ */
 int
 xdp_sock_send (xdp_sock_t *self, char *buffer, size_t buffer_size)
 {
@@ -430,8 +552,6 @@ xdp_sock_send (xdp_sock_t *self, char *buffer, size_t buffer_size)
         XDP_LOG_MSG(XDP_LOG_WARNING, "TX batch full!");
         return -1;
     }
-    int ret = 0;
-
 
     struct xdp_desc *tx_desc = xsk_ring_prod__tx_desc(&self->tx,
                                   (self->idx_tx_batch + self->idx_tx));

@@ -95,6 +95,203 @@
              
   <section id="xdp-socket">
 <h1>XDP Socket<a class="headerlink" href="#xdp-socket" title="Permalink to this heading"></a></h1>
+<section id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this heading"></a></h2>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xdp_sock_new">
+<span class="n"><span class="pre">xdp_sock_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">xdp_sock_new</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">xdp_iface_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">xdp_interface</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xdp_sock_new" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.c.html#c.xdp_sock_new"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Create new xdp_sock object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>On success new xdp_sock object, or NULL if the new xdp_sock could not be created.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="destructor">
+<h2>Destructor<a class="headerlink" href="#destructor" title="Permalink to this heading"></a></h2>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xdp_sock_destroy">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">xdp_sock_destroy</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">xdp_sock_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">self_p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xdp_sock_destroy" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.c.html#c.xdp_sock_destroy"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Destroy xdp_sock object. You must use this for any tcp server created via the
+xdp_sock_new method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self_p</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">xdp_sock_t</span><span class="p">*</span><span class="p">*</span></span></span>) – pointer to xdp_sock_t object reference,
+so the destructor can nullify it</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None (void)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h2>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xdp_sock_lookup_bpf_map">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">xdp_sock_lookup_bpf_map</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">xdp_sock_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">self</span></span>, <span class="n"><span class="pre">xdp_iface_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">xdp_interface</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">map_name</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">key_size</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">value_size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xdp_sock_lookup_bpf_map" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.c.html#c.xdp_sock_lookup_bpf_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Attach XSKS map to socket fd</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self_p</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">xdp_sock_t</span><span class="p">*</span></span></span>) – pointer to xdp_sock_t object</p></li>
+<li><p><strong>xdp_interface</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">xdp_iface_t</span><span class="p">*</span></span></span>) – pointer to xdp_iface_t object</p></li>
+<li><p><strong>map_name</strong> (<span><span class="c-expr sig sig-inline c"><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="p">*</span></span></span>) – map name</p></li>
+<li><p><strong>key_size</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">uint32_t</span></span></span>) – map keys size</p></li>
+<li><p><strong>value_size</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">uint32_t</span></span></span>) – map values size</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, err value on failiure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xdp_sock_set_sockopt">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">xdp_sock_set_sockopt</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">xdp_sock_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">self</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">opt_type</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">opt_value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xdp_sock_set_sockopt" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.c.html#c.xdp_sock_set_sockopt"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Set socket option</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self_p</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">xdp_sock_t</span><span class="p">*</span></span></span>) – pointer to xdp_sock_t object</p></li>
+<li><p><strong>opt_type</strong> (<span><span class="c-expr sig sig-inline c"><span class="kt">int</span></span></span>) – option type</p></li>
+<li><p><strong>opt_value</strong> (<span><span class="c-expr sig sig-inline c"><span class="kt">int</span></span></span>) – option value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, err value on failiure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xdp_sock_get_fd">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">xdp_sock_get_fd</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">xdp_sock_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">self</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xdp_sock_get_fd" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.c.html#c.xdp_sock_get_fd"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Get socket descriptor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self_p</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">xdp_sock_t</span><span class="p">*</span></span></span>) – pointer to xdp_sock_t object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>socket descriptor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xdp_sock_rx_batch_get_size">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">xdp_sock_rx_batch_get_size</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">xdp_sock_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">self</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">frames_rcvd</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">nb</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xdp_sock_rx_batch_get_size" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.c.html#c.xdp_sock_rx_batch_get_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Get size, number of frames received</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self_p</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">xdp_sock_t</span><span class="p">*</span></span></span>) – pointer to xdp_sock_t object</p></li>
+<li><p><strong>frames_rcvd</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">uint32_t</span><span class="p">*</span></span></span>) – number of received frames</p></li>
+<li><p><strong>nb</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">uint32_t</span></span></span>) – maximum number of frames to receive</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, -1 on failiure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xdp_sock_rx_batch_release">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">xdp_sock_rx_batch_release</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">xdp_sock_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">self</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">frames_rcvd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xdp_sock_rx_batch_release" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.c.html#c.xdp_sock_rx_batch_release"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Release received batch</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self_p</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">xdp_sock_t</span><span class="p">*</span></span></span>) – pointer to xdp_sock_t object</p></li>
+<li><p><strong>frames_rcvd</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">uint32_t</span></span></span>) – number of received frames to release</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xdp_sock_recv">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">xdp_sock_recv</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">xdp_sock_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">self</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buffer</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buffer_size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xdp_sock_recv" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.c.html#c.xdp_sock_recv"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Read/receive a frame from the RX batch</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self_p</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">xdp_sock_t</span><span class="p">*</span></span></span>) – pointer to xdp_sock_t object</p></li>
+<li><p><strong>buffer</strong> (<span><span class="c-expr sig sig-inline c"><span class="kt">char</span><span class="p">*</span></span></span>) – receive buffer</p></li>
+<li><p><strong>buffer_size</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">size_t</span><span class="p">*</span></span></span>) – size of the received buffer</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xdp_sock_tx_batch_set_size">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">xdp_sock_tx_batch_set_size</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">xdp_sock_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">self</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">nb</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xdp_sock_tx_batch_set_size" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.c.html#c.xdp_sock_tx_batch_set_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Set size of the TX batch</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self_p</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">xdp_sock_t</span><span class="p">*</span></span></span>) – pointer to xdp_sock_t object</p></li>
+<li><p><strong>nb</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">uint32_t</span></span></span>) – number of slots to prepare in the tx ring</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, -1 on failiure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xdp_sock_tx_batch_release">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">xdp_sock_tx_batch_release</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">xdp_sock_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">self</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">frames_send</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xdp_sock_tx_batch_release" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.c.html#c.xdp_sock_tx_batch_release"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Trigger send of the frames in the TX batch</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self_p</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">xdp_sock_t</span><span class="p">*</span></span></span>) – pointer to xdp_sock_t object</p></li>
+<li><p><strong>frames_send</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">uint32_t</span></span></span>) – number of frames to send</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xdp_sock_send">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">xdp_sock_send</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">xdp_sock_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">self</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buffer</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">buffer_size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xdp_sock_send" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.c.html#c.xdp_sock_send"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Send/place a frame in the TX ring</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self_p</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">xdp_sock_t</span><span class="p">*</span></span></span>) – pointer to xdp_sock_t object</p></li>
+<li><p><strong>buffer</strong> (<span><span class="c-expr sig sig-inline c"><span class="kt">char</span><span class="p">*</span></span></span>) – buffer to send</p></li>
+<li><p><strong>buffer_size</strong> (<span><span class="c-expr sig sig-inline c"><span class="n">size_t</span></span></span>) – size of the buffer to send</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 
 

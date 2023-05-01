@@ -90,6 +90,300 @@
              
   <section id="examples">
 <h1>Examples<a class="headerlink" href="#examples" title="Permalink to this heading"></a></h1>
+<p>The following examples illustrate how to send &amp; receive a batch of 30 frames using
+the <code class="docutils literal notranslate"><span class="pre">xdpiface</span></code> lib.</p>
+<div class="tab-set docutils">
+<input checked="True" class="tab-input" id="tab-set--0-input--1" name="tab-set--0" type="radio"><label class="tab-label" for="tab-set--0-input--1">C</label><div class="tab-content docutils">
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;sys/socket.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;xdpiface_classes.h&quot;</span><span class="cp"></span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">hex_dump</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">pkt</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">length</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">address</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">pkt</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">line</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">address</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">line_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">c</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">buf</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;length = %zu</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%s | &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">buf</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">length</span><span class="o">--</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%02X &quot;</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">address</span><span class="o">++</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="o">++</span><span class="n">i</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">line_size</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">(</span><span class="n">length</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">line_size</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">length</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="o">++</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">line_size</span><span class="p">)</span><span class="w"></span>
+<span class="w">                    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;__ &quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot; | &quot;</span><span class="p">);</span><span class="w">  </span><span class="cm">/* right close */</span><span class="w"></span>
+<span class="w">            </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">line</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">address</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">line</span><span class="o">++</span><span class="p">;</span><span class="w"></span>
+<span class="w">                </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%c&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">33</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">255</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mh">0x2E</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">c</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">length</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">                </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%s | &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">buf</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="w"> </span><span class="p">[])</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">batch_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">30</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">frames_rcvd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">xdp_prog_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;./xdp_sock_bpf.o&quot;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">i_buffer</span><span class="p">[</span><span class="mi">9000</span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">i_buffer_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">o_buffer_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">o_buffer</span><span class="p">[</span><span class="mi">9000</span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="n">o_buffer</span><span class="p">,</span><span class="w"> </span><span class="mh">0x55</span><span class="p">,</span><span class="w"> </span><span class="n">o_buffer_size</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">*</span><span class="n">xdp_iface</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_iface_new</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;lo&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_iface_load_program</span><span class="p">(</span><span class="n">xdp_iface</span><span class="p">,</span><span class="w"> </span><span class="n">xdp_prog_path</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">ret</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;Failed to load program (%s)!&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">xdp_prog_path</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">goto</span><span class="w"> </span><span class="n">exit</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_sock_t</span><span class="w"> </span><span class="o">*</span><span class="n">xdp_sock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_sock_new</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_iface</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock_lookup_bpf_map</span><span class="p">(</span><span class="n">xdp_sock</span><span class="p">,</span><span class="w"> </span><span class="n">xdp_iface</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;xsks_map&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_sock_set_sockopt</span><span class="p">(</span><span class="n">xdp_sock</span><span class="p">,</span><span class="w"> </span><span class="n">SO_PREFER_BUSY_POLL</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock_set_sockopt</span><span class="p">(</span><span class="n">xdp_sock</span><span class="p">,</span><span class="w"> </span><span class="n">SO_BUSY_POLL</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock_set_sockopt</span><span class="p">(</span><span class="n">xdp_sock</span><span class="p">,</span><span class="w"> </span><span class="n">SO_BUSY_POLL_BUDGET</span><span class="p">,</span><span class="w"> </span><span class="n">batch_size</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_sock_tx_batch_set_size</span><span class="p">(</span><span class="n">xdp_sock</span><span class="p">,</span><span class="w"> </span><span class="n">batch_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">batch_size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="n">xdp_sock_send</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_sock</span><span class="p">,</span><span class="w"> </span><span class="n">o_buffer</span><span class="p">,</span><span class="w"> </span><span class="n">o_buffer_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock_tx_batch_release</span><span class="p">(</span><span class="n">xdp_sock</span><span class="p">,</span><span class="w"> </span><span class="n">batch_size</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_sock_rx_batch_get_size</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_sock</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">frames_rcvd</span><span class="p">,</span><span class="w"> </span><span class="n">batch_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">frames_rcvd</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">++</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">xdp_sock_recv</span><span class="w"> </span><span class="p">(</span><span class="n">xdp_sock</span><span class="p">,</span><span class="w"> </span><span class="n">i_buffer</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">i_buffer_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">hex_dump</span><span class="p">(</span><span class="n">i_buffer</span><span class="p">,</span><span class="w"> </span><span class="n">i_buffer_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock_rx_batch_release</span><span class="p">(</span><span class="n">xdp_sock</span><span class="p">,</span><span class="w"> </span><span class="n">frames_rcvd</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_sock_destroy</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">xdp_sock</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_iface_unload_program</span><span class="p">(</span><span class="n">xdp_iface</span><span class="p">);</span><span class="w"></span>
+<span class="nl">exit</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_iface_destroy</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">xdp_iface</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<input class="tab-input" id="tab-set--0-input--2" name="tab-set--0" type="radio"><label class="tab-label" for="tab-set--0-input--2">C++</label><div class="tab-content docutils">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;sys/socket.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstring&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;xdpiface.hpp&quot;</span><span class="cp"></span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">hexdump</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">buflen</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">buf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">ptr</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">buflen</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">+=</span><span class="mi">16</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%06x: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">buflen</span><span class="p">)</span><span class="w"></span>
+<span class="w">                </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%02x &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">buf</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="p">]);</span><span class="w"></span>
+<span class="w">            </span><span class="k">else</span><span class="w"></span>
+<span class="w">                </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;   &quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">buflen</span><span class="p">)</span><span class="w"></span>
+<span class="w">                </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%c&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">isprint</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="p">])</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">buf</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="sc">&#39;.&#39;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="w"> </span><span class="p">[])</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">batch_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">30</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">frames_rcvd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">o_buffer_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">o_buffer</span><span class="p">[</span><span class="mi">9000</span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="n">o_buffer</span><span class="p">,</span><span class="w"> </span><span class="mh">0x55</span><span class="p">,</span><span class="w"> </span><span class="n">o_buffer_size</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">i_buffer</span><span class="p">[</span><span class="mi">9000</span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">i_buffer_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">xdp_prog_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;./xdp_sock_bpf.o&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">interface</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;lo&quot;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">XdpIface</span><span class="w"> </span><span class="n">xdp_iface</span><span class="p">(</span><span class="n">interface</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_iface</span><span class="p">.</span><span class="n">loadProgram</span><span class="p">(</span><span class="n">xdp_prog_path</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">XdpSock</span><span class="w"> </span><span class="n">xdp_sock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">xdp_iface</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock</span><span class="p">.</span><span class="n">lookupBpfMap</span><span class="p">(</span><span class="o">&amp;</span><span class="n">xdp_iface</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;xsks_map&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_sock</span><span class="p">.</span><span class="n">setSockopt</span><span class="p">(</span><span class="n">SO_PREFER_BUSY_POLL</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock</span><span class="p">.</span><span class="n">setSockopt</span><span class="p">(</span><span class="n">SO_BUSY_POLL</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock</span><span class="p">.</span><span class="n">setSockopt</span><span class="p">(</span><span class="n">SO_BUSY_POLL_BUDGET</span><span class="p">,</span><span class="w"> </span><span class="n">batch_size</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_sock</span><span class="p">.</span><span class="n">txBatchSetSize</span><span class="p">(</span><span class="n">batch_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">batch_size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="n">xdp_sock</span><span class="p">.</span><span class="n">send</span><span class="w"> </span><span class="p">(</span><span class="n">o_buffer</span><span class="p">,</span><span class="w"> </span><span class="n">o_buffer_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock</span><span class="p">.</span><span class="n">txBatchRelease</span><span class="p">(</span><span class="n">batch_size</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_sock</span><span class="p">.</span><span class="n">rxBatchGetSize</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">frames_rcvd</span><span class="p">,</span><span class="w"> </span><span class="n">batch_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">frames_rcvd</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">++</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">xdp_sock</span><span class="p">.</span><span class="n">recv</span><span class="w"> </span><span class="p">(</span><span class="n">i_buffer</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">i_buffer_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">hexdump</span><span class="p">(</span><span class="n">i_buffer</span><span class="p">,</span><span class="w"> </span><span class="n">i_buffer_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_sock</span><span class="p">.</span><span class="n">rxBatchRelease</span><span class="p">(</span><span class="n">frames_rcvd</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Frames received: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">frames_rcvd</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">xdp_iface</span><span class="p">.</span><span class="n">unloadProgram</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<input class="tab-input" id="tab-set--0-input--3" name="tab-set--0" type="radio"><label class="tab-label" for="tab-set--0-input--3">Python</label><div class="tab-content docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xdpiface</span>
+
+<span class="kn">from</span> <span class="nn">ctypes</span> <span class="kn">import</span> <span class="n">c_int</span><span class="p">,</span> <span class="n">create_string_buffer</span><span class="p">,</span> <span class="n">c_size_t</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">30</span>
+
+    <span class="n">xdp_iface</span> <span class="o">=</span> <span class="n">xdpiface</span><span class="o">.</span><span class="n">XdpIface</span><span class="p">(</span><span class="s2">&quot;lo&quot;</span><span class="p">)</span>
+    <span class="n">xdp_iface</span><span class="o">.</span><span class="n">load_program</span><span class="p">(</span><span class="s2">&quot;./xdp_sock_bpf.o&quot;</span><span class="p">)</span>
+
+    <span class="n">xdp_sock</span> <span class="o">=</span> <span class="n">xdpiface</span><span class="o">.</span><span class="n">XdpSock</span><span class="p">(</span><span class="n">xdp_iface</span><span class="p">)</span>
+    <span class="n">xdp_sock</span><span class="o">.</span><span class="n">lookup_bpf_map</span><span class="p">(</span><span class="n">xdp_iface</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;xsks_map&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="n">xdp_sock</span><span class="o">.</span><span class="n">set_sockopt</span><span class="p">(</span><span class="n">xdpiface</span><span class="o">.</span><span class="n">SO_PREFER_BUSY_POLL</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">xdp_sock</span><span class="o">.</span><span class="n">set_sockopt</span><span class="p">(</span><span class="n">xdpiface</span><span class="o">.</span><span class="n">SO_BUSY_POLL</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="n">xdp_sock</span><span class="o">.</span><span class="n">set_sockopt</span><span class="p">(</span><span class="n">xdpiface</span><span class="o">.</span><span class="n">SO_BUSY_POLL_BUDGET</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">)</span>
+
+    <span class="n">frames_recd</span> <span class="o">=</span> <span class="n">c_int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">i_buffer</span> <span class="o">=</span> <span class="n">create_string_buffer</span><span class="p">(</span><span class="mi">9000</span><span class="p">)</span>
+    <span class="n">i_buffer_size</span> <span class="o">=</span> <span class="n">c_size_t</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">frames_received</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">o_buffer</span> <span class="o">=</span> <span class="n">create_string_buffer</span><span class="p">(</span><span class="mi">1500</span><span class="p">)</span>
+    <span class="n">o_buffer</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">([</span><span class="mh">0x55</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1500</span><span class="p">)</span>
+    <span class="n">o_buffer_size</span> <span class="o">=</span> <span class="n">c_size_t</span><span class="p">(</span><span class="mi">1500</span><span class="p">)</span>
+
+    <span class="n">xdp_sock</span><span class="o">.</span><span class="n">tx_batch_set_size</span><span class="p">(</span><span class="n">batch_size</span><span class="p">);</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
+        <span class="n">xdp_sock</span><span class="o">.</span><span class="n">send</span> <span class="p">(</span><span class="n">o_buffer</span><span class="p">,</span> <span class="n">o_buffer_size</span><span class="p">);</span>
+    <span class="n">xdp_sock</span><span class="o">.</span><span class="n">tx_batch_release</span><span class="p">(</span><span class="n">batch_size</span><span class="p">);</span>
+
+    <span class="n">xdp_sock</span><span class="o">.</span><span class="n">rx_batch_get_size</span> <span class="p">(</span><span class="n">frames_recd</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">);</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">frames_recd</span><span class="o">.</span><span class="n">value</span><span class="p">):</span>
+        <span class="n">xdp_sock</span><span class="o">.</span><span class="n">recv</span> <span class="p">(</span><span class="n">i_buffer</span><span class="p">,</span> <span class="n">i_buffer_size</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">hexdump</span><span class="p">(</span><span class="n">i_buffer</span><span class="o">.</span><span class="n">raw</span><span class="p">[:</span><span class="n">i_buffer_size</span><span class="o">.</span><span class="n">value</span><span class="p">]))</span>
+    <span class="n">xdp_sock</span><span class="o">.</span><span class="n">rx_batch_release</span><span class="p">(</span><span class="n">frames_recd</span><span class="o">.</span><span class="n">value</span><span class="p">);</span>
+
+    <span class="n">xdp_iface</span><span class="o">.</span><span class="n">unload_program</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">hexdump</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">off</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buf</span> <span class="o">=</span> <span class="n">buf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">off</span> <span class="o">=</span> <span class="n">off</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">last_bs</span><span class="p">,</span> <span class="n">last_line</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">),</span> <span class="mi">16</span><span class="p">):</span>
+            <span class="n">bs</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">16</span><span class="p">])</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:08x}</span><span class="s2">  </span><span class="si">{:23}</span><span class="s2">  </span><span class="si">{:23}</span><span class="s2">  |</span><span class="si">{:16}</span><span class="s2">|&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">off</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span>
+                <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;</span><span class="si">{:02x}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bs</span><span class="p">[:</span><span class="mi">8</span><span class="p">])),</span>
+                <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;</span><span class="si">{:02x}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bs</span><span class="p">[</span><span class="mi">8</span><span class="p">:])),</span>
+                <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="nb">chr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="mi">32</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">127</span> <span class="k">else</span> <span class="s2">&quot;.&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bs</span><span class="p">)),</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">bs</span> <span class="o">==</span> <span class="n">last_bs</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
+            <span class="k">if</span> <span class="n">bs</span> <span class="o">!=</span> <span class="n">last_bs</span> <span class="ow">or</span> <span class="n">line</span> <span class="o">!=</span> <span class="n">last_line</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">line</span>
+            <span class="n">last_bs</span><span class="p">,</span> <span class="n">last_line</span> <span class="o">=</span> <span class="n">bs</span><span class="p">,</span> <span class="n">line</span>
+        <span class="k">yield</span> <span class="s2">&quot;</span><span class="si">{:08x}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">off</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buf</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<input class="tab-input" id="tab-set--0-input--4" name="tab-set--0" type="radio"><label class="tab-label" for="tab-set--0-input--4">Golang</label><div class="tab-content docutils">
+<div class="highlight-go notranslate"><div class="highlight"><pre><span></span><span class="kn">package</span><span class="w"> </span><span class="nx">main</span><span class="w"></span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="w">    </span><span class="s">&quot;testing&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="s">&quot;encoding/hex&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="s">&quot;bytes&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="s">&quot;fmt&quot;</span><span class="w"></span>
+
+<span class="w">    </span><span class="s">&quot;xdpiface&quot;</span><span class="w"> </span><span class="c1">// This may vary</span><span class="w"></span>
+<span class="p">)</span><span class="w"></span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">batch_size</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">uint32</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">frames_rcvd</span><span class="w"> </span><span class="kt">uint32</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">oBufferSize</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1000</span><span class="w"></span>
+<span class="w">    </span><span class="nx">oBuffer</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">bytes</span><span class="p">.</span><span class="nx">Repeat</span><span class="p">([]</span><span class="kt">byte</span><span class="p">{</span><span class="mh">0x55</span><span class="p">},</span><span class="w"> </span><span class="nx">oBufferSize</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">iBufferSize</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="w">    </span><span class="nx">iBuffer</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span><span class="w"> </span><span class="mi">9000</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">    </span><span class="nx">xdp_iface</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">XdpIfaceNew</span><span class="p">(</span><span class="s">&quot;lo&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;Failed to create XDP iface&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">xdp_iface</span><span class="p">.</span><span class="nx">Destroy</span><span class="p">()</span><span class="w"></span>
+
+<span class="w">    </span><span class="nx">xdp_iface</span><span class="p">.</span><span class="nx">LoadProgram</span><span class="p">(</span><span class="s">&quot;./xdp_sock_bpf.o&quot;</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">    </span><span class="nx">xdp_sock</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">XdpSockNew</span><span class="p">(</span><span class="nx">xdp_iface</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;Failed to create XDP sock&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">xdp_sock</span><span class="p">.</span><span class="nx">Destroy</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="nx">xdp_sock</span><span class="p">.</span><span class="nx">LoopUpBpfMap</span><span class="p">(</span><span class="nx">xdp_iface</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;xsks_map&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">    </span><span class="nx">xdp_sock</span><span class="p">.</span><span class="nx">SetSockopt</span><span class="p">(</span><span class="nx">SO_PREFER_BUSY_POLL</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="nx">xdp_sock</span><span class="p">.</span><span class="nx">SetSockopt</span><span class="p">(</span><span class="nx">SO_BUSY_POLL</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="nx">xdp_sock</span><span class="p">.</span><span class="nx">SetSockopt</span><span class="p">(</span><span class="nx">SO_BUSY_POLL_BUDGET</span><span class="p">,</span><span class="w"> </span><span class="nb">int</span><span class="p">(</span><span class="nx">batch_size</span><span class="p">))</span><span class="w"></span>
+
+<span class="w">    </span><span class="nx">xdp_sock</span><span class="p">.</span><span class="nx">TxBatchSetSize</span><span class="p">(</span><span class="nx">batch_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nb">int</span><span class="p">(</span><span class="nx">batch_size</span><span class="p">);</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nx">xdp_sock</span><span class="p">.</span><span class="nx">Send</span><span class="w"> </span><span class="p">(</span><span class="nx">oBuffer</span><span class="p">,</span><span class="w"> </span><span class="nx">oBufferSize</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nx">xdp_sock</span><span class="p">.</span><span class="nx">TxBatchRelease</span><span class="p">(</span><span class="nx">batch_size</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="nx">xdp_sock</span><span class="p">.</span><span class="nx">RxBatchGetSize</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="nx">frames_rcvd</span><span class="p">,</span><span class="w"> </span><span class="nx">batch_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nb">int</span><span class="p">(</span><span class="nx">frames_rcvd</span><span class="p">);</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">++</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nx">xdp_sock</span><span class="p">.</span><span class="nx">Recv</span><span class="w"> </span><span class="p">(</span><span class="nx">iBuffer</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">iBufferSize</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">hex</span><span class="p">.</span><span class="nx">Dump</span><span class="p">(</span><span class="nx">iBuffer</span><span class="p">[:</span><span class="nx">iBufferSize</span><span class="p">]))</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nx">xdp_sock</span><span class="p">.</span><span class="nx">RxBatchRelease</span><span class="p">(</span><span class="nx">frames_rcvd</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">    </span><span class="nx">xdp_iface</span><span class="p">.</span><span class="nx">UnloadProgram</span><span class="p">()</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+</div>
 </section>
 
 
