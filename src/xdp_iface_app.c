@@ -84,7 +84,6 @@ int main (int argc, char *argv [])
 
     uint32_t batch_size = 30;
     uint32_t frames_rcvd = 0;
-    const char *xdp_prog_path = "xdp_sock_bpf.o";
 
     char i_buffer[9000];
     size_t i_buffer_size = 0;
@@ -99,18 +98,18 @@ int main (int argc, char *argv [])
     xdp_iface_t *xdp_iface = xdp_iface_new (XDP_IFACE_DEFAULT);
     assert (xdp_iface);
 
-    ret = xdp_iface_load_program(xdp_iface, xdp_prog_path);
+    ret = xdp_iface_load_program(xdp_iface, XDP_IFACE_XDP_PROG_DEFAULT);
     if (0 != ret) {
-        printf( "Failed to load program (%s)!", xdp_prog_path);
+        printf( "Failed to load program (%s)!", XDP_IFACE_XDP_PROG_DEFAULT);
         goto exit;
     }
 
     xdp_sock_t *xdp_sock = xdp_sock_new (xdp_iface);
-    xdp_sock_lookup_bpf_map(xdp_sock, xdp_iface, "xsks_map", 4, 4);
+    xdp_sock_lookup_bpf_map(xdp_sock, xdp_iface, XDP_SOCK_XSKS_MAP_DEFAULT, 4, 4);
 
-    xdp_sock_set_sockopt(xdp_sock, SO_PREFER_BUSY_POLL, 1);
-    xdp_sock_set_sockopt(xdp_sock, SO_BUSY_POLL, 20);
-    xdp_sock_set_sockopt(xdp_sock, SO_BUSY_POLL_BUDGET, batch_size);
+    xdp_sock_set_sockopt(xdp_sock, XDP_SOCK_SO_PREFER_BUSY_POLL, 1);
+    xdp_sock_set_sockopt(xdp_sock, XDP_SOCK_SO_BUSY_POLL, 20);
+    xdp_sock_set_sockopt(xdp_sock, XDP_SOCK_SO_BUSY_POLL_BUDGET, batch_size);
 
     signal(SIGINT, sig_handler);
     signal(SIGTERM, sig_handler);
