@@ -7,9 +7,6 @@ import xdpiface
 
 from ctypes import c_int, create_string_buffer, c_size_t
 
-XDP_IFACE=b"lo"
-XDP_SOCK_PROG=b"../../build/xdp_sock_bpf.o"
-
 STOP = False
 def sig_handler(sig, frame):
     global STOP
@@ -51,15 +48,15 @@ def send_frames(xdp_sock):
 def main():
     batch_size = 30
 
-    xdp_iface = xdpiface.XdpIface(XDP_IFACE)
-    xdp_iface.load_program(XDP_SOCK_PROG)
+    xdp_iface = xdpiface.XdpIface(xdpiface.XdpIface.DEFAULT.encode())
+    xdp_iface.load_program(xdpiface.XdpIface.XDP_PROG_DEFAULT.encode())
 
     xdp_sock = xdpiface.XdpSock(xdp_iface)
-    xdp_sock.lookup_bpf_map(xdp_iface, b"xsks_map", 4, 4)
+    xdp_sock.lookup_bpf_map(xdp_iface, xdpiface.XdpSock.XSKS_MAP_DEFAULT.encode(), 4, 4)
 
-    xdp_sock.set_sockopt(xdpiface.SO_PREFER_BUSY_POLL, 1)
-    xdp_sock.set_sockopt(xdpiface.SO_BUSY_POLL, 20)
-    xdp_sock.set_sockopt(xdpiface.SO_BUSY_POLL_BUDGET, batch_size)
+    xdp_sock.set_sockopt(xdpiface.XdpSock.SO_PREFER_BUSY_POLL, 1)
+    xdp_sock.set_sockopt(xdpiface.XdpSock.SO_BUSY_POLL, 20)
+    xdp_sock.set_sockopt(xdpiface.XdpSock.SO_BUSY_POLL_BUDGET, batch_size)
 
     signal.signal(signal.SIGINT, sig_handler)
     signal.signal(signal.SIGTERM, sig_handler)

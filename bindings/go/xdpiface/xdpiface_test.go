@@ -8,7 +8,7 @@ import (
 )
 
 func TestXdpIface(t *testing.T) {
-	xdp_iface, err := XdpIfaceNew("lo")
+	xdp_iface, err := XdpIfaceNew(XDP_IFACE_DEFAULT)
 	if err != nil {
 		t.Errorf("Failed to create XDP iface")
 	}
@@ -25,20 +25,20 @@ func TestXdpSock(t *testing.T) {
 	var iBufferSize int = 0
 	iBuffer := make([]byte, 9000)
 
-	xdp_iface, err := XdpIfaceNew("lo")
+	xdp_iface, err := XdpIfaceNew(XDP_IFACE_DEFAULT)
 	if err != nil {
 		t.Errorf("Failed to create XDP iface")
 	}
 	defer xdp_iface.Destroy()
 
-	xdp_iface.LoadProgram("./../../../build/xdp_sock_bpf.o")
+	xdp_iface.LoadProgram(XDP_IFACE_XDP_PROG_DEFAULT)
 
 	xdp_sock, err := XdpSockNew(xdp_iface)
 	if err != nil {
 		t.Errorf("Failed to create XDP sock")
 	}
 	defer xdp_sock.Destroy()
-	xdp_sock.LoopUpBpfMap(xdp_iface, "xsks_map", 4, 4)
+	xdp_sock.LoopUpBpfMap(xdp_iface, XDP_SOCK_XSKS_MAP_DEFAULT, 4, 4)
 
     xdp_sock.SetSockopt(SO_PREFER_BUSY_POLL, 1)
     xdp_sock.SetSockopt(SO_BUSY_POLL, 20)

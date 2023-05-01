@@ -36,18 +36,15 @@ int main (int argc, char *argv [])
     char i_buffer[9000];
     size_t i_buffer_size = 0;
 
-    const std::string xdp_prog_path = "./../../../build/xdp_sock_bpf.o";
-    const std::string interface = "lo";
-
-    XdpIface xdp_iface(interface);
-    xdp_iface.loadProgram(xdp_prog_path);
+    XdpIface xdp_iface(XDP_IFACE_DEFAULT);
+    xdp_iface.loadProgram(XDP_IFACE_XDP_PROG_DEFAULT);
 
     XdpSock xdp_sock(&xdp_iface);
-    xdp_sock.lookupBpfMap(&xdp_iface, "xsks_map", 4, 4);
+    xdp_sock.lookupBpfMap(&xdp_iface, XDP_SOCK_XSKS_MAP_DEFAULT, 4, 4);
 
-    xdp_sock.setSockopt(SO_PREFER_BUSY_POLL, 1);
-    xdp_sock.setSockopt(SO_BUSY_POLL, 20);
-    xdp_sock.setSockopt(SO_BUSY_POLL_BUDGET, batch_size);
+    xdp_sock.setSockopt(XDP_SOCK_SO_PREFER_BUSY_POLL, 1);
+    xdp_sock.setSockopt(XDP_SOCK_SO_BUSY_POLL, 20);
+    xdp_sock.setSockopt(XDP_SOCK_SO_BUSY_POLL_BUDGET, batch_size);
 
     xdp_sock.txBatchSetSize(batch_size);
     for (int i = 0; i < batch_size; i++)

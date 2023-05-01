@@ -12,6 +12,9 @@ import (
 	"unsafe"
 )
 
+const XDP_IFACE_DEFAULT string  = C.XDP_IFACE_DEFAULT
+const XDP_IFACE_XDP_PROG_DEFAULT string  = C.XDP_IFACE_XDP_PROG_DEFAULT
+
 type XdpIface struct {
 	ctx *C.xdp_iface_t
 }
@@ -53,10 +56,11 @@ type XdpSock struct {
 	ctx *C.xdp_sock_t
 }
 
+const XDP_SOCK_XSKS_MAP_DEFAULT string = C.XDP_SOCK_XSKS_MAP_DEFAULT
 const (
-	SO_PREFER_BUSY_POLL int = 69
-	SO_BUSY_POLL = 36
-	SO_BUSY_POLL_BUDGET = 70
+	SO_PREFER_BUSY_POLL int = C.XDP_SOCK_SO_PREFER_BUSY_POLL
+	SO_BUSY_POLL = C.XDP_SOCK_SO_BUSY_POLL
+	SO_BUSY_POLL_BUDGET = C.XDP_SOCK_SO_BUSY_POLL_BUDGET
 )
 
 func XdpSockNew (xdpInterface *XdpIface) (*XdpSock, error) {

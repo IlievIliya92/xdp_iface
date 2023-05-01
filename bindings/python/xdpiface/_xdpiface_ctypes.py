@@ -73,6 +73,7 @@ class XdpIface(object):
     """
 
     DEFAULT = "lo" # The default network interface
+    XDP_PROG_DEFAULT = "/usr/local/lib/bpf/xdp_sock_bpf.o" # Default XDP program name
     allow_destruct = False
     def __init__(self, *args):
         """
@@ -179,6 +180,10 @@ class XdpSock(object):
     The xdp_sock class!
     """
 
+    XSKS_MAP_DEFAULT = "xsks_map" # The xsks map name
+    SO_PREFER_BUSY_POLL = 69 # Prefer busy poll
+    SO_BUSY_POLL = 36 # Busy poll
+    SO_BUSY_POLL_BUDGET = 70 # Busy poll budget
     allow_destruct = False
     def __init__(self, *args):
         """

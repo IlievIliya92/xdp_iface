@@ -16,26 +16,18 @@ mod tests {
 
     #[test]
     fn xdp_iface_constructor_destructor() {
-        /* Those constatns are still not ported */
-        const SO_PREFER_BUSY_POLL: i32 = 69;
-        const SO_BUSY_POLL: i32 = 36;
-        const SO_BUSY_POLL_BUDGET: i32 = 70;
-
         unsafe {
-            let interface = CString::new("lo").unwrap();
-            let xdp_prog = CString::new("./../../../build/xdp_sock_bpf.o").unwrap();
-            let xdp_xsks_map = CString::new("xsks_map").unwrap();
             const batch_size: u32 = 30;
 
-            let mut xdp_iface: *mut xdp_iface_t = xdp_iface_new(interface.as_ptr() as *const i8);
-            xdp_iface_load_program(xdp_iface, xdp_prog.as_ptr() as *const i8);
+            let mut xdp_iface: *mut xdp_iface_t = xdp_iface_new(XDP_IFACE_DEFAULT.as_ptr() as *const i8);
+            xdp_iface_load_program(xdp_iface, XDP_IFACE_XDP_PROG_DEFAULT.as_ptr() as *const i8);
 
             let mut xdp_sock: *mut xdp_sock_t = xdp_sock_new(xdp_iface);
-            xdp_sock_lookup_bpf_map(xdp_sock, xdp_iface, xdp_xsks_map.as_ptr() as *const i8 , 4, 4);
+            xdp_sock_lookup_bpf_map(xdp_sock, xdp_iface, XDP_SOCK_XSKS_MAP_DEFAULT.as_ptr() as *const i8 , 4, 4);
 
-            xdp_sock_set_sockopt(xdp_sock, SO_PREFER_BUSY_POLL, 1);
-            xdp_sock_set_sockopt(xdp_sock, SO_BUSY_POLL, 20);
-            xdp_sock_set_sockopt(xdp_sock, SO_BUSY_POLL_BUDGET, batch_size as i32);
+            xdp_sock_set_sockopt(xdp_sock, XDP_SOCK_SO_PREFER_BUSY_POLL as i32, 1);
+            xdp_sock_set_sockopt(xdp_sock, XDP_SOCK_SO_BUSY_POLL as i32, 20);
+            xdp_sock_set_sockopt(xdp_sock, XDP_SOCK_SO_BUSY_POLL_BUDGET as i32, batch_size as i32);
 
             let o_buffer_size = 1500;
             let pattern = 0x55;
