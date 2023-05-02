@@ -29,6 +29,7 @@ IF (ENABLE_DRAFTS)
     ADD_DEFINITIONS (-DXDPIFACE_BUILD_DRAFT_API)
 ENDIF (ENABLE_DRAFTS)
 
+OPTION (XDP_SOCK_BPF "Build XDP Prog object" ON)
 OPTION (CPP_BINDINGS "Build and install CPP bindings" ON)
 OPTION (PYTHON_BINDINGS "Build and install Python bindings" ON)
 OPTION (RUST_BINDINGS "Build RUST bindings" OFF)
@@ -371,7 +372,9 @@ include(CTest)
 ########################################################################
 # XDP BPF SOCK
 ########################################################################
-add_subdirectory(xdp_sock_bpf)
+IF(XDP_SOCK_BPF)
+    add_subdirectory(xdp_sock_bpf)
+ENDIF()
 
 ########################################################################
 # Bindings
@@ -384,6 +387,13 @@ add_subdirectory(bindings)
 IF(SPHINX_DOCS)
     add_subdirectory(docs_src)
 ENDIF()
+
+########################################################################
+# Debian Pkg
+########################################################################
+set(CPACK_GENERATOR "DEB")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Iliya Iliev")
+include(CPack)
 
 ########################################################################
 # cleanup
