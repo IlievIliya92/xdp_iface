@@ -29,6 +29,11 @@ IF (ENABLE_DRAFTS)
     ADD_DEFINITIONS (-DXDPIFACE_BUILD_DRAFT_API)
 ENDIF (ENABLE_DRAFTS)
 
+OPTION (CPP_BINDINGS "Build and install CPP bindings" ON)
+OPTION (PYTHON_BINDINGS "Build and install Python bindings" ON)
+OPTION (RUST_BINDINGS "Build RUST bindings" OFF)
+OPTION (SPHINX_DOCS "Build Sphinx Docs" OFF)
+
 ########################################################################
 # platform.h
 ########################################################################
@@ -376,7 +381,9 @@ add_subdirectory(bindings)
 ########################################################################
 # Docs
 ########################################################################
-add_subdirectory(docs_src)
+IF(SPHINX_DOCS)
+    add_subdirectory(docs_src)
+ENDIF()
 
 ########################################################################
 # cleanup
@@ -429,6 +436,26 @@ message (STATUS "  Draft API         :   Yes")
 ELSE (ENABLE_DRAFTS)
 message (STATUS "  Draft API         :   No")
 ENDIF (ENABLE_DRAFTS)
+IF (CPP_BINDINGS)
+message (STATUS "  CPP Bindings      :   Yes")
+ELSE (CPP_BINDINGS)
+message (STATUS "  CPP Bindings      :   No")
+ENDIF()
+IF (PYTHON_BINDINGS)
+message (STATUS "  Python Bindings   :   Yes")
+ELSE (PYTHON_BINDINGS)
+message (STATUS "  Python Bindings   :   No")
+ENDIF()
+IF (RUST_BINDINGS)
+message (STATUS "  Rust Bindings     :   Yes")
+ELSE (RUST_BINDINGS)
+message (STATUS "  Rust Bindings     :   No")
+ENDIF()
+IF (SPHINX_DOCS)
+message (STATUS "  Sphinx Docs       :   Yes")
+ELSE (SPHINX_DOCS)
+message (STATUS "  Sphinx Docs       :   No")
+ENDIF()
 message (STATUS "")
 message (STATUS "Dependencies:")
 include(FeatureSummary)
