@@ -20,7 +20,7 @@ RUN cd /home/xdp_iface && \
      git clone https://github.com/IlievIliya92/xdp_iface.git && \
      cd xdp_iface && \
      mkdir build && cd build && \
-     cmake .. && \
+     cmake -DPYTHON_BINDINGS=ON .. && \
      make
 
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64/
