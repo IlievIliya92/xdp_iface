@@ -114,6 +114,9 @@ Cargo.lock
 # Go .test binary
 *.test
 
+# VMs
+*.qcow2
+
 # MSVC build directories
 obj/
 bin/
