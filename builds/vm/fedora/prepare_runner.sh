@@ -2,6 +2,7 @@
 
 # Script to prepare runner: install all packages to build and run virtual machine.
 # Must be run every time (fresh runner) job starts.
+apt update
 
 apt install -y \
     bridge-utils \
