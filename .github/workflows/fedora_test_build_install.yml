@@ -37,3 +37,7 @@ jobs:
       - name: Install VM
         working-directory: ./builds/vm/fedora
         run: sudo ./install_vm.sh
+
+      - name: Execute XDP iface selftest
+        working-directory: ./builds/vm/fedora
+        run: ./xdp_iface_test.sh
