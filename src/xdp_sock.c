@@ -587,26 +587,24 @@ xdp_sock_test (bool verbose)
 
     uint32_t batch_size = 64;
     uint32_t frames_rcvd = 0;
-    const char *xdp_prog_path = "xdp_sock_bpf.o";
-
     XDP_LOG_MSG(XDP_LOG_INFO, " * xdp_sock: ");
 
     //  @selftest
     xdp_iface_t *xdp_iface = xdp_iface_new (XDP_IFACE_DEFAULT);
     assert (xdp_iface);
 
-    ret = xdp_iface_load_program(xdp_iface, xdp_prog_path);
+    ret = xdp_iface_load_program(xdp_iface, XDP_IFACE_XDP_PROG_DEFAULT);
     if (0 != ret) {
-        XDP_LOG_MSG(XDP_LOG_ERROR, "Failed to load program (%s)!", xdp_prog_path);
+        XDP_LOG_MSG(XDP_LOG_ERROR, "Failed to load program (%s)!", XDP_IFACE_XDP_PROG_DEFAULT);
         goto exit;
     }
 
     xdp_sock_t *self = xdp_sock_new (xdp_iface);
-    xdp_sock_lookup_bpf_map(self, xdp_iface, "xsks_map", 4, 4);
+    xdp_sock_lookup_bpf_map(self, xdp_iface, XDP_SOCK_XSKS_MAP_DEFAULT, 4, 4);
 
-    xdp_sock_set_sockopt(self, SO_PREFER_BUSY_POLL, 1);
-    xdp_sock_set_sockopt(self, SO_BUSY_POLL, 20);
-    xdp_sock_set_sockopt(self, SO_BUSY_POLL_BUDGET, batch_size);
+    xdp_sock_set_sockopt(self, XDP_SOCK_SO_PREFER_BUSY_POLL, 1);
+    xdp_sock_set_sockopt(self, XDP_SOCK_SO_BUSY_POLL, 20);
+    xdp_sock_set_sockopt(self, XDP_SOCK_SO_BUSY_POLL_BUDGET, batch_size);
 
     xdp_sock_destroy (&self);
     xdp_iface_unload_program(xdp_iface);
