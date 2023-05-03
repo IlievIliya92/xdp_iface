@@ -214,8 +214,6 @@ xdp_iface_test (bool verbose)
 {
     int ret = 0;
 
-    const char *xdp_prog_path = "xdp_sock_bpf.o";
-
     XDP_LOG_MSG(XDP_LOG_INFO, " * xdp_iface: ");
 
     //  @selftest
@@ -223,9 +221,9 @@ xdp_iface_test (bool verbose)
     xdp_iface_t *self = xdp_iface_new (XDP_IFACE_DEFAULT);
     assert (self);
 
-    ret = xdp_iface_load_program(self, xdp_prog_path);
+    ret = xdp_iface_load_program(self, XDP_IFACE_XDP_PROG_DEFAULT);
     if (0 != ret) {
-        XDP_LOG_MSG(XDP_LOG_ERROR, "Failed to load program (%s)!", xdp_prog_path);
+        XDP_LOG_MSG(XDP_LOG_ERROR, "Failed to load program (%s)!", XDP_IFACE_XDP_PROG_DEFAULT);
         goto exit;
     }
 
