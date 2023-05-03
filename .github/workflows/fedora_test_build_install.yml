@@ -15,6 +15,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Cache QCOW VM
+        uses: actions/cache@v3.0.5
+        id: cache
+        with:
+          path: ./builds/vm/fedora/f37vm.qcow2
+          key:  ${{ runner.os }}-qcow-cache
+
       - name: Prepare runner
         working-directory: ./builds/vm/fedora
         run: sudo ./prepare_runner.sh
@@ -22,6 +29,10 @@ jobs:
       - name: Build VM
         working-directory: ./builds/vm/fedora
         run: sudo ./build_vm.sh
+
+      - name: Grant permissions
+        working-directory: ./builds/vm/fedora
+        run: sudo setfacl -m u:libvirt-qemu:x /home/runner/
 
       - name: Install VM
         working-directory: ./builds/vm/fedora
