@@ -8,4 +8,7 @@ virt-builder fedora-37 -o f37vm.qcow2 --format qcow2 \
     --upload xdp_iface_setup.sh:/home/xdp_iface_setup.sh \
     --run-command "chmod +x /home/xdp_iface_setup.sh" \
     --run-command './home/xdp_iface_setup.sh' \
-    --run-command "sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/g' /etc/ssh/sshd_config"
+    --run-command "sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/g' /etc/ssh/sshd_config" \
+    --run-command "sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config" \
+    --append-line '/root/.bashrc:export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64/' \
+    --append-line '/root/.bashrc:export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib'
