@@ -80,10 +80,73 @@ To quit the application use `Ctrl + C`
 
 ### Bindings usage
 
-To test the python bindings there is a similar software which resides in the
-`bindings/python/` directory. To run it use the following command:
+To test the bindings there is a similar test application which resides in the
+corresponding `bindings/` directory for each of the supported languages.
+
+#### C++
+
+```console
+cd bindings/cpp/
+mkdir build
+cd build
+cmake ..
+make
+sudo ./xdpiface_app_cpp
+```
+
+#### Go
+
+```console
+cd bindings/go/xdpiface
+go test -c
+sudo ./xdpiface.test
+```
+
+#### Python
 
 ```console
 cd bindings/python/
 sudo python3 xdpiface_app.py
 ```
+
+#### Rust
+
+```console
+cd bindings/rust/libxdpiface-sys
+sudo cargo test -- --nocapture
+```
+
+## Virtual Machine deployment
+
+Currently VM image is supported for Fedora37 to build & install the VM follow
+the instructions below:
+
+```console
+cd builds/vm/fedora
+sudo ./prepare_runner.sh
+sudo ./build_vm.sh
+sudo ./install_vm.sh
+```
+
+To verify the installation and check that the VM is up and run:
+
+```console
+virsh list
+ Id   Name    State
+-----------------------
+ 40   f37vm   running
+```
+
+To log in to the running VM:
+
+```console
+ssh root@192.168.122.2
+```
+
+The login details are:
+
+* Username: root
+* Password: fedora
+
+The deployment directory of the `xdp_iface` is located under `/home/xdp_iface_workdir/`.
+The build artefacts should resided under the `/home/xdp_iface_work_dir/xdp_iface/build`.

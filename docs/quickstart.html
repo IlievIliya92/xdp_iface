@@ -103,6 +103,7 @@
 <li><p><a class="reference internal" href="#bindings-usage" id="id6">Bindings usage</a></p></li>
 </ul>
 </li>
+<li><p><a class="reference internal" href="#virtual-machine-deployment" id="id7">Virtual Machine deployment</a></p></li>
 </ul>
 </li>
 </ul>
@@ -180,13 +181,71 @@ sends a batch of packets which is received and printed on the stdout. To run the
 </section>
 <section id="bindings-usage">
 <h3><a class="toc-backref" href="#id6" role="doc-backlink">Bindings usage</a><a class="headerlink" href="#bindings-usage" title="Permalink to this heading"></a></h3>
-<p>To test the python bindings there is a similar software which resides in the
-<code class="docutils literal notranslate"><span class="pre">bindings/python/</span></code> directory. To run it use the following command:</p>
+<p>To test the bindings there is a similar test application which resides in the
+corresponding <code class="docutils literal notranslate"><span class="pre">bindings/</span></code> directory for each of the supported languages.</p>
+<section id="c">
+<h4>C++<a class="headerlink" href="#c" title="Permalink to this heading"></a></h4>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd bindings/cpp/</span>
+<span class="go">mkdir build</span>
+<span class="go">cd build</span>
+<span class="go">cmake ..</span>
+<span class="go">make</span>
+<span class="go">sudo ./xdpiface_app_cpp</span>
+</pre></div>
+</div>
+</section>
+<section id="go">
+<h4>Go<a class="headerlink" href="#go" title="Permalink to this heading"></a></h4>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd bindings/go/xdpiface</span>
+<span class="go">go test -c</span>
+<span class="go">sudo ./xdpiface.test</span>
+</pre></div>
+</div>
+</section>
+<section id="python">
+<h4>Python<a class="headerlink" href="#python" title="Permalink to this heading"></a></h4>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd bindings/python/</span>
 <span class="go">sudo python3 xdpiface_app.py</span>
 </pre></div>
 </div>
 </section>
+<section id="rust">
+<h4>Rust<a class="headerlink" href="#rust" title="Permalink to this heading"></a></h4>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd bindings/rust/libxdpiface-sys</span>
+<span class="go">sudo cargo test -- --nocapture</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="virtual-machine-deployment">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Virtual Machine deployment</a><a class="headerlink" href="#virtual-machine-deployment" title="Permalink to this heading"></a></h2>
+<p>Currently VM image is supported for Fedora37 to build &amp; install the VM follow
+the instructions below:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd builds/vm/fedora</span>
+<span class="go">sudo ./prepare_runner.sh</span>
+<span class="go">sudo ./build_vm.sh</span>
+<span class="go">sudo ./install_vm.sh</span>
+</pre></div>
+</div>
+<p>To verify the installation and check that the VM is up and run:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">virsh list</span>
+<span class="go"> Id   Name    State</span>
+<span class="go">-----------------------</span>
+<span class="go"> 40   f37vm   running</span>
+</pre></div>
+</div>
+<p>To log in to the running VM:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">ssh root@192.168.122.2</span>
+</pre></div>
+</div>
+<p>The login details are:</p>
+<ul class="simple">
+<li><p>Username: root</p></li>
+<li><p>Password: fedora</p></li>
+</ul>
+<p>The deployment directory of the <code class="docutils literal notranslate"><span class="pre">xdp_iface</span></code> is located under <code class="docutils literal notranslate"><span class="pre">/home/xdp_iface_workdir/</span></code>.
+The build artefacts should resided under the <code class="docutils literal notranslate"><span class="pre">/home/xdp_iface_work_dir/xdp_iface/build</span></code>.</p>
 </section>
 </section>
 
