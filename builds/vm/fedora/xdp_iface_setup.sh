@@ -16,6 +16,9 @@ cd xdp_iface
 mkdir build && cd build
 cmake -DPYTHON_BINDINGS=ON ..
 make
+make install
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64/
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+
 ldconfig
