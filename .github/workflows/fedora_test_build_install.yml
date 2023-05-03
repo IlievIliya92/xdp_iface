@@ -1,0 +1,28 @@
+name: Fedora Test Build
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  fedora37_build_install:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Prepare runner
+        working-directory: ./builds/vm/fedora
+        run: sudo ./prepare_runner.sh
+
+      - name: Build VM
+        working-directory: ./builds/vm/fedora
+        run: sudo ./build_vm.sh
+
+      - name: Install VM
+        working-directory: ./builds/vm/fedora
+        run: sudo ./install_vm.sh
