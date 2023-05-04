@@ -2,7 +2,7 @@ name: Fedora Test Build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
   pull_request:
 
   # Allows you to run this workflow manually from the Actions tab
