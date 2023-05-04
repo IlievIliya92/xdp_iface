@@ -41,3 +41,7 @@ jobs:
       - name: Execute XDP iface selftest
         working-directory: ./builds/vm/fedora
         run: ./xdp_iface_test.sh
+
+      - name: Step to run on selftest failure
+        if: ${{ failure() }}
+        run: echo Selftest failed...
