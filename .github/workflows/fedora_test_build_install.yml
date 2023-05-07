@@ -42,7 +42,3 @@ jobs:
         working-directory: ./builds/vm/fedora
         run: ./xdp_iface_test.sh
         continue-on-error: true
-
-      - name: Step to run on selftest failure
-        if: ${{ failure() }}
-        run: echo Selftest failed...
