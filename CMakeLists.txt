@@ -6,8 +6,10 @@ project(xdpiface)
 enable_language(C)
 enable_testing()
 
+set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fanalyzer")
 # Select flags
 if(MSVC)
     SET(CMAKE_C_FLAGS_RELEASE "/O2")
