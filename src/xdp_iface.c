@@ -227,9 +227,8 @@ xdp_iface_test (bool verbose)
         goto exit;
     }
 
-    xdp_iface_unload_program(self);
-
 exit:
+    xdp_iface_unload_program(self);
     xdp_iface_destroy (&self);
 
     //  @end
