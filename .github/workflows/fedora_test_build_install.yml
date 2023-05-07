@@ -20,7 +20,6 @@ jobs:
         run: sudo ./prepare_runner.sh
 
       - name: Cache VM disk
-        uses: actions/cache@v3.0.5
         working-directory: ./builds/vm/fedora
         id: cache-vm-disk
         run: |
