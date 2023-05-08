@@ -7,7 +7,7 @@ virt-builder fedora-37 -o $VM_DISK_IMAGE --format qcow2 \
     --root-password password:toor \
     --timezone "`cat /etc/timezone`" \
     --update --selinux-relabel \
-    --install "git,clang,llvm,m4,kernel-headers,cmake,bpftool,elfutils-libelf-devel,libpcap-devel,perf,pkg-config,python3,python3-pip" \
+    --install "git,clang,llvm,m4,kernel-headers,cmake,bpftool,elfutils-libelf-devel,libpcap-devel,perf,pkg-config,golang,rust,cargo,python3,python3-pip" \
     --upload xdp_iface_setup.sh:/home/xdp_iface_setup.sh \
     --run-command "chmod +x /home/xdp_iface_setup.sh" \
     --run-command './home/xdp_iface_setup.sh' \
