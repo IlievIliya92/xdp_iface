@@ -1,4 +1,4 @@
-<class name = "xdp_sock">
+<class name = "xdp_sock" state = "stable">
     The xdp_sock class!
 
     <constant name = "XSKS_MAP_DEFAULT" type="string" value = "xsks_map">The xsks map name</constant>

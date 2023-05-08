@@ -1,4 +1,4 @@
-<class name = "xdp_iface">
+<class name = "xdp_iface" state = "stable">
     The xdp_iface class!
 
     <constant name = "DEFAULT" type="string" value = "lo">The default network interface</constant>

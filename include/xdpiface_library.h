@@ -95,26 +95,18 @@
 #   endif
 #endif
 
-//  Project has no stable classes, so we build the draft API
-#undef  XDPIFACE_BUILD_DRAFT_API
-#define XDPIFACE_BUILD_DRAFT_API
-
 //  Opaque class structures to allow forward references
 //  These classes are stable or legacy and built in all releases
-//  Draft classes are by default not built in stable releases
-#ifdef XDPIFACE_BUILD_DRAFT_API
 typedef struct _xdp_iface_t xdp_iface_t;
 #define XDP_IFACE_T_DEFINED
 typedef struct _xdp_sock_t xdp_sock_t;
 #define XDP_SOCK_T_DEFINED
-#endif // XDPIFACE_BUILD_DRAFT_API
-
+#define XDP_LOG_T_DEFINED
 
 //  Public classes, each with its own header file
-#ifdef XDPIFACE_BUILD_DRAFT_API
 #include "xdp_iface.h"
 #include "xdp_sock.h"
-#endif // XDPIFACE_BUILD_DRAFT_API
+#include "xdp_log.h"
 
 #ifdef XDPIFACE_BUILD_DRAFT_API
 
