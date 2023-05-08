@@ -9,6 +9,7 @@ apt install -y \
     qemu-kvm \
     libvirt-daemon-system \
     libvirt-clients \
+    net-tools \
     virtinst \
     libguestfs-tools \
     wait-for-it \

@@ -8,8 +8,8 @@ wait-for-it "$IP:22" -t 900 -s -- echo ready
 
 sudo ssh-keygen -f "/root/.ssh/known_hosts" -R "$IP"
 set -x
-sshpass -p fedora ssh -o "StrictHostKeyChecking=no" "root@$IP" uname -a
-sshpass -p fedora ssh "root@$IP" "/home/xdp_iface_work_dir/xdp_iface/build/xdpiface_selftest"
+sshpass -p toor ssh -o "StrictHostKeyChecking=no" "root@$IP" uname -a
+sshpass -p toor ssh "root@$IP" "/home/xdp_iface_work_dir/xdp_iface/build/xdpiface_selftest"
 
 sudo virsh shutdown f37vm
 until sudo virsh domstate f37vm | grep shut; do

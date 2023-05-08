@@ -4,7 +4,7 @@ VM_DISK_IMAGE="./f37vm.qcow2"
 
 # Build Fedora 37 VM & install deps
 virt-builder fedora-37 -o $VM_DISK_IMAGE --format qcow2 \
-    --root-password password:fedora \
+    --root-password password:toor \
     --timezone "`cat /etc/timezone`" \
     --update --selinux-relabel \
     --install "git,clang,llvm,m4,kernel-headers,cmake,bpftool,elfutils-libelf-devel,libpcap-devel,perf,pkg-config,python3,python3-pip" \
@@ -20,3 +20,4 @@ virt-builder fedora-37 -o $VM_DISK_IMAGE --format qcow2 \
 mv "$VM_DISK_IMAGE" "$VM_DISK_IMAGE.old"
 qemu-img convert -O qcow2 -c "$VM_DISK_IMAGE.old" "$VM_DISK_IMAGE"
 rm -f "$VM_DISK_IMAGE.old"
+
