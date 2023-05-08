@@ -20,7 +20,7 @@ jobs:
         id: cache-vm-disk
         with:
           path: ./builds/vm/fedora/f37vm.qcow2
-          key: ${{ runner.os }}-vm-disk-${{ hashFiles('builds/vm/fedora/f37vm.qcow2') }}
+          key: ${{ runner.os }}-vm-disk-${{ hashFiles('builds/vm/fedora/build_vm.sh') }}
 
       - name: Prepare runner
         working-directory: ./builds/vm/fedora
