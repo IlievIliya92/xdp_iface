@@ -45,11 +45,10 @@ typedef struct {
 
 static test_item_t
 all_tests [] = {
-#ifdef XDPIFACE_BUILD_DRAFT_API
-// Tests for draft public classes:
-    { "xdp_iface", xdp_iface_test, false, true, NULL },
-    { "xdp_sock", xdp_sock_test, false, true, NULL },
-#endif // XDPIFACE_BUILD_DRAFT_API
+// Tests for stable public classes:
+    { "xdp_iface", xdp_iface_test, true, true, NULL },
+    { "xdp_sock", xdp_sock_test, true, true, NULL },
+    { "xdp_log", xdp_log_test, true, true, NULL },
     {NULL, NULL, 0, 0, NULL}          //  Sentinel
 };
 

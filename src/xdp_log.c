@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <stdarg.h>
 
 #include "xdp_log.h"
 
@@ -18,8 +19,14 @@
 #define WHITE() (fprintf(stdout, "\033[0;37m"))
 #define RESET()  (fprintf(stdout, "\033[0m"))
 
+/****************************** TYPEDEFS **************************************/
+typedef struct _xdp_log_priv_t {
+    int log_lvl;
+} xdp_log_priv_t;
+#define XDP_LOG_INIT_DFLT {XDP_LOG_INFO}
+
 /******************************* DATA *****************************************/
-static xdp_log_lvl_t current_log_level = XDP_LOG_INFO;
+static xdp_log_priv_t _xdp_log_priv = XDP_LOG_INIT_DFLT;
 
 static const char *xdp_log_lvl_str[XDP_LOG_LVLS] = {
     "TRACE",
@@ -31,7 +38,7 @@ static const char *xdp_log_lvl_str[XDP_LOG_LVLS] = {
 };
 /***************************** LOCAL FUNCTIONS ********************************/
 static
-void xdp_log_col_line(xdp_log_lvl_t level)
+void xdp_log_col_line(int level)
 {
     switch(level)
     {
@@ -62,15 +69,49 @@ void xdp_log_col_line(xdp_log_lvl_t level)
     return;
 }
 
-/************************* INTERFACE FUNCTIONS ********************************/
-void xdp_log_level_set(xdp_log_lvl_t level)
+static void
+xdp_log_hexdump_format(void *buffer, size_t buffer_len)
 {
-    current_log_level = level;
+    const unsigned char *address = (unsigned char *)buffer;
+    const unsigned char *line = address;
+    size_t line_size = 32;
+    unsigned char c;
+    char buf[32];
+    int i = 0;
+
+    fprintf(stdout, " Buffer length = %zu\n", buffer_len);
+    fprintf(stdout, "%s | ", buf);
+    while (buffer_len-- > 0) {
+        fprintf(stdout, "%02X ", *address++);
+        if (!(++i % line_size) || (buffer_len == 0 && i % line_size)) {
+            if (buffer_len == 0) {
+                while (i++ % line_size)
+                    fprintf(stdout, "__ ");
+            }
+            fprintf(stdout, " | ");  /* right close */
+            while (line < address) {
+                c = *line++;
+                fprintf(stdout, "%c", (c < 33 || c == 255) ? 0x2E : c);
+            }
+            fprintf(stdout, "\n");
+            if (buffer_len > 0)
+                fprintf(stdout, "%s | ", buf);
+        }
+    }
+    fprintf(stdout, "\n");
 }
 
-void xdp_log_msg(const char *module, int line, xdp_log_lvl_t level, const char *format, ...)
+/************************* INTERFACE FUNCTIONS ********************************/
+void
+xdp_log_level_set(int level)
 {
-    if (level < current_log_level)
+    _xdp_log_priv.log_lvl = level;
+}
+
+void
+xdp_log_msg(const char *module, int line, int level, const char *format, ...)
+{
+    if (level < _xdp_log_priv.log_lvl)
         return;
 
     char timestamp[100];
@@ -99,4 +140,30 @@ void xdp_log_msg(const char *module, int line, xdp_log_lvl_t level, const char *
     /* print to stdout */
     fprintf(stdout, "%s\n", buffer);
     RESET();
+}
+
+void
+xdp_log_hexdump (const char *module, int line, int level, const char *description,
+    void *buffer, size_t buffer_len)
+{
+    if (level < _xdp_log_priv.log_lvl)
+        return;
+
+    xdp_log_msg(module, line, level, description);
+    xdp_log_hexdump_format(buffer, buffer_len);
+}
+
+void
+xdp_log_test (bool verbose)
+{
+    int lvl = XDP_LOG_TRACE;
+    char buff[100];
+    memset(buff, 0xAA, 100);
+
+    xdp_log_level_set(XDP_LOG_TRACE);
+
+    for (lvl = XDP_LOG_TRACE; lvl < XDP_LOG_LVLS; lvl++)
+        xdp_log_msg("LOG_MODULE", __LINE__, lvl, "test for: %s", xdp_log_lvl_str[lvl]);
+
+    xdp_log_hexdump("LOG_MODULE", __LINE__, XDP_LOG_INFO, "test hexdump", buff, 100);
 }

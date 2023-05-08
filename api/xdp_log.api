@@ -1,0 +1,38 @@
+<class name = "xdp_log" state = "stable" selftest = "1">
+    The xdp_log class!
+
+    <constant name = "TRACE" value = "0" />
+    <constant name = "DEBUG" value = "1" />
+    <constant name = "INFO" value = "2" />
+    <constant name = "WARNING" value = "3" />
+    <constant name = "ERROR" value = "4" />
+    <constant name = "CRITICAL" value = "5" />
+    <constant name = "LVLS" value = "6" />
+
+    <method name = "level_set" singleton = "1" >
+        Set log level
+        <argument name = "level" type = "integer" />
+        <return type = "nothing" />
+    </method>
+
+    <method name = "msg" singleton = "1" >
+        Log message
+        <argument name = "module" type = "string" />
+        <argument name = "line" type = "integer" />
+        <argument name = "level" type = "integer" />
+        <argument name = "format" type = "string" variadic = "1" />
+        <return type = "nothing" />
+    </method>
+
+    <method name = "hexdump" singleton = "1" >
+        Hexdump
+        <argument name = "module" type = "string" />
+        <argument name = "line" type = "integer" />
+        <argument name = "level" type = "integer" />
+        <argument name = "description" type = "string" />
+        <argument name = "buffer" type = "anything" />
+        <argument name = "buffer_len" type = "size" />
+        <return type = "nothing" />
+    </method>
+
+</class>

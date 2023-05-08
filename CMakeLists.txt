@@ -94,6 +94,7 @@ IF (ENABLE_DRAFTS)
     list(APPEND xdpiface_headers
         include/xdp_iface.h
         include/xdp_sock.h
+        include/xdp_log.h
     )
 ENDIF (ENABLE_DRAFTS)
 

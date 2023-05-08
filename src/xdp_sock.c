@@ -459,6 +459,7 @@ xdp_sock_recv (xdp_sock_t *self, char *buffer, size_t *buffer_size)
     addr = xsk_umem__add_offset_to_addr(addr);
     /* This can be avoided but it will be tricky to pass data through python bindings */
     memcpy(buffer, xsk_umem__get_data(self->umem->buffer, addr), *buffer_size);
+    XDP_LOG_HEXDUMP(XDP_LOG_TRACE, "Inbound buffer", buffer, *buffer_size);
 
     *xsk_ring_prod__fill_addr(&self->umem->fq, self->idx_fq++) = orig;
 
@@ -558,6 +559,7 @@ xdp_sock_send (xdp_sock_t *self, char *buffer, size_t buffer_size)
     tx_desc->addr = self->idx_tx * XDP_IFACE_XSK_FRAMESIZE;
     tx_desc->len = buffer_size;
 
+    XDP_LOG_HEXDUMP(XDP_LOG_TRACE, "Outbound buffer", buffer, buffer_size);
     memcpy(xsk_umem__get_data(self->umem->buffer, tx_desc->addr), buffer, buffer_size);
     self->idx_tx++;
 
