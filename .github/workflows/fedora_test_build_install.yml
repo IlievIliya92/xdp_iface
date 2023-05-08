@@ -15,20 +15,22 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Cache VM disk
+        working-directory: ./builds/vm/fedora
+        uses: actions/cache@v3.0.5
+        id: cache-vm-disk
+        with:
+          path: ./f37vm.qcow2
+          key: ${{ runner.os }}-vm-disk-${{ hashFiles('f37vm.qcow2') }}
+
       - name: Prepare runner
         working-directory: ./builds/vm/fedora
         run: sudo ./prepare_runner.sh
 
-      - name: Cache VM disk
+      - name: Build VM
         working-directory: ./builds/vm/fedora
-        id: cache-vm-disk
-        run: |
-          if [ -f ./f37vm.qcow2 ]; then
-            echo "VM disk image found in cache"
-          else
-            echo "VM disk image not found in cache"
-            sudo ./build_vm.sh
-          fi
+        if: steps.cache-vm-disk.outputs.cache-hit != 'true'
+        run: sudo ./build_vm.sh
 
       - name: Grant permissions
         working-directory: ./builds/vm/fedora
@@ -42,9 +44,3 @@ jobs:
         working-directory: ./builds/vm/fedora
         run: ./xdp_iface_test.sh
         continue-on-error: true
-
-      - name: Save cache
-        working-directory: ./builds/vm/fedora
-        if: steps.cache-vm-disk.outputs.cache-hit != 'true'
-        run: |
-          echo "./f37vm.qcow2=${{ steps.cache-vm-disk.outputs.cache-hit }}" >> $GITHUB_ENV
