@@ -88,14 +88,13 @@ message(STATUS "Detected XDPIFACE Version - ${XDPIFACE_VERSION}")
 set (xdpiface_headers
     include/xdpiface_library.h
     include/xdpiface.h
+    include/xdp_iface.h
+    include/xdp_sock.h
+    include/xdp_log.h
 )
 
 IF (ENABLE_DRAFTS)
-    list(APPEND xdpiface_headers
-        include/xdp_iface.h
-        include/xdp_sock.h
-        include/xdp_log.h
-    )
+    list(APPEND xdpiface_headers)
 ENDIF (ENABLE_DRAFTS)
 
 source_group ("Header Files" FILES ${xdpiface_headers})
@@ -108,13 +107,14 @@ install(FILES ${xdpiface_headers} DESTINATION include)
 
 include_directories("${SOURCE_DIR}/src" "${SOURCE_DIR}/include" "${PROJECT_BINARY_DIR}")
 set (xdpiface_sources
+    src/xdp_iface.c
+    src/xdp_sock.c
+    src/xdp_log.c
 )
 
 IF (ENABLE_DRAFTS)
     list (APPEND xdpiface_sources
-        src/xdp_iface.c
-        src/xdp_sock.c
-        src/xdp_log.c
+
     )
 ENDIF (ENABLE_DRAFTS)
 
@@ -318,12 +318,13 @@ if(UNIX)
 endif()
 
 set(TEST_CLASSES
+    xdp_iface
+    xdp_sock
+    xdp_log
 )
 
 IF (ENABLE_DRAFTS)
     list (APPEND TEST_CLASSES
-    xdp_iface
-    xdp_sock
     )
 ENDIF (ENABLE_DRAFTS)
 
