@@ -1,6 +1,13 @@
 XDP Interface
 =============
 
+Defaults
+--------
+
+.. autocmacro:: xdp_iface.h::XDP_IFACE_DEFAULT
+
+.. autocmacro:: xdp_iface.h::XDP_IFACE_XDP_PROG_DEFAULT
+
 Constructor
 -----------
 

@@ -27,7 +27,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Examples" href="../examples.html" />
-    <link rel="prev" title="XDP Interface" href="xdp_iface.html" /> 
+    <link rel="prev" title="XDP Log" href="xdp_log.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -53,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">QuickStart</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="xdp_iface.html">XDP Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="xdp_log.html">XDP Log</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">XDP Socket</a></li>
 </ul>
 </li>
@@ -95,6 +96,15 @@
              
   <section id="xdp-socket">
 <h1>XDP Socket<a class="headerlink" href="#xdp-socket" title="Permalink to this heading"></a></h1>
+<section id="defaults">
+<h2>Defaults<a class="headerlink" href="#defaults" title="Permalink to this heading"></a></h2>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.XDP_SOCK_XSKS_MAP_DEFAULT">
+<span class="sig-name descname"><span class="n"><span class="pre">XDP_SOCK_XSKS_MAP_DEFAULT</span></span></span><a class="headerlink" href="#c.XDP_SOCK_XSKS_MAP_DEFAULT" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.h.html#c.XDP_SOCK_XSKS_MAP_DEFAULT"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Default xsks map name</p>
+</dd></dl>
+
+</section>
 <section id="constructor">
 <h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this heading"></a></h2>
 <dl class="c function">
@@ -168,6 +178,26 @@ so the destructor can nullify it</p></li>
 <dd class="field-even"><p>0 on success, err value on failiure</p>
 </dd>
 </dl>
+</dd></dl>
+
+<section id="sock-options">
+<h3>Sock Options<a class="headerlink" href="#sock-options" title="Permalink to this heading"></a></h3>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.XDP_SOCK_SO_PREFER_BUSY_POLL">
+<span class="sig-name descname"><span class="n"><span class="pre">XDP_SOCK_SO_PREFER_BUSY_POLL</span></span></span><a class="headerlink" href="#c.XDP_SOCK_SO_PREFER_BUSY_POLL" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.h.html#c.XDP_SOCK_SO_PREFER_BUSY_POLL"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Prefer busy poll sockopt</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.XDP_SOCK_SO_BUSY_POLL">
+<span class="sig-name descname"><span class="n"><span class="pre">XDP_SOCK_SO_BUSY_POLL</span></span></span><a class="headerlink" href="#c.XDP_SOCK_SO_BUSY_POLL" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.h.html#c.XDP_SOCK_SO_BUSY_POLL"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Busy poll sockopt</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.XDP_SOCK_SO_BUSY_POLL_BUDGET">
+<span class="sig-name descname"><span class="n"><span class="pre">XDP_SOCK_SO_BUSY_POLL_BUDGET</span></span></span><a class="headerlink" href="#c.XDP_SOCK_SO_BUSY_POLL_BUDGET" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_sock.h.html#c.XDP_SOCK_SO_BUSY_POLL_BUDGET"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Busy poll budget sockopt</p>
 </dd></dl>
 
 <dl class="c function">
@@ -293,12 +323,13 @@ so the destructor can nullify it</p></li>
 
 </section>
 </section>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="xdp_iface.html" class="btn btn-neutral float-left" title="XDP Interface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="xdp_log.html" class="btn btn-neutral float-left" title="XDP Log" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

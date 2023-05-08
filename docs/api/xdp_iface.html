@@ -26,7 +26,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="XDP Socket" href="xdp_sock.html" />
+    <link rel="next" title="XDP Log" href="xdp_log.html" />
     <link rel="prev" title="API" href="index.html" /> 
 </head>
 
@@ -53,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">QuickStart</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">XDP Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="xdp_log.html">XDP Log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="xdp_sock.html">XDP Socket</a></li>
 </ul>
 </li>
@@ -95,6 +96,21 @@
              
   <section id="xdp-interface">
 <h1>XDP Interface<a class="headerlink" href="#xdp-interface" title="Permalink to this heading"></a></h1>
+<section id="defaults">
+<h2>Defaults<a class="headerlink" href="#defaults" title="Permalink to this heading"></a></h2>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.XDP_IFACE_DEFAULT">
+<span class="sig-name descname"><span class="n"><span class="pre">XDP_IFACE_DEFAULT</span></span></span><a class="headerlink" href="#c.XDP_IFACE_DEFAULT" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_iface.h.html#c.XDP_IFACE_DEFAULT"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>The default network interface</p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.XDP_IFACE_XDP_PROG_DEFAULT">
+<span class="sig-name descname"><span class="n"><span class="pre">XDP_IFACE_XDP_PROG_DEFAULT</span></span></span><a class="headerlink" href="#c.XDP_IFACE_XDP_PROG_DEFAULT" title="Permalink to this definition"></a><br /><a class="reference internal" href="../_modules/xdp_iface.h.html#c.XDP_IFACE_XDP_PROG_DEFAULT"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Default XDP program name</p>
+</dd></dl>
+
+</section>
 <section id="constructor">
 <h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this heading"></a></h2>
 <dl class="c function">
@@ -189,7 +205,7 @@ so the destructor can nullify it</p></li>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="xdp_sock.html" class="btn btn-neutral float-right" title="XDP Socket" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="xdp_log.html" class="btn btn-neutral float-right" title="XDP Log" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

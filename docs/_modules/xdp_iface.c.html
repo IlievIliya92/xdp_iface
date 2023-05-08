@@ -302,8 +302,6 @@
 <span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">xdp_prog_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;xdp_sock_bpf.o&quot;</span><span class="p">;</span><span class="w"></span>
-
 <span class="w">    </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_INFO</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; * xdp_iface: &quot;</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">    </span><span class="c1">//  @selftest</span>
@@ -311,15 +309,14 @@
 <span class="w">    </span><span class="n">xdp_iface_t</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_iface_new</span><span class="w"> </span><span class="p">(</span><span class="n">XDP_IFACE_DEFAULT</span><span class="p">);</span><span class="w"></span>
 <span class="w">    </span><span class="n">assert</span><span class="w"> </span><span class="p">(</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
 
-<span class="w">    </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_iface_load_program</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">xdp_prog_path</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdp_iface_load_program</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">XDP_IFACE_XDP_PROG_DEFAULT</span><span class="p">);</span><span class="w"></span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">ret</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Failed to load program (%s)!&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">xdp_prog_path</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">XDP_LOG_MSG</span><span class="p">(</span><span class="n">XDP_LOG_ERROR</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Failed to load program (%s)!&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">XDP_IFACE_XDP_PROG_DEFAULT</span><span class="p">);</span><span class="w"></span>
 <span class="w">        </span><span class="k">goto</span><span class="w"> </span><span class="n">exit</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-<span class="w">    </span><span class="n">xdp_iface_unload_program</span><span class="p">(</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
-
 <span class="nl">exit</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">xdp_iface_unload_program</span><span class="p">(</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
 <span class="w">    </span><span class="n">xdp_iface_destroy</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">    </span><span class="c1">//  @end</span>

@@ -38,10 +38,14 @@ extern "C" {
 //  This is a stable class, and may not change except for emergencies. It
 //  is provided in stable builds.
 
-// The default network interface
+/**
+ * The default network interface
+ */
 #define XDP_IFACE_DEFAULT "lo"
 
-// Default XDP program name
+/**
+ *  Default XDP program name
+ */
 #define XDP_IFACE_XDP_PROG_DEFAULT "/usr/local/lib/bpf/xdp_sock_bpf.o"
 
 //  Create a new xdp iface

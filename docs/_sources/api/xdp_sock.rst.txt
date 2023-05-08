@@ -1,6 +1,11 @@
 XDP Socket
 ==========
 
+Defaults
+--------
+
+.. autocmacro:: xdp_sock.h::XDP_SOCK_XSKS_MAP_DEFAULT
+
 Constructor
 -----------
 
@@ -17,6 +22,13 @@ Methods
 .. autocfunction:: xdp_sock.c::xdp_sock_lookup_bpf_map
 
 .. autocfunction:: xdp_sock.c::xdp_sock_set_sockopt
+
+Sock Options
+~~~~~~~~~~~~
+
+.. autocmacro:: xdp_sock.h::XDP_SOCK_SO_PREFER_BUSY_POLL
+.. autocmacro:: xdp_sock.h::XDP_SOCK_SO_BUSY_POLL
+.. autocmacro:: xdp_sock.h::XDP_SOCK_SO_BUSY_POLL_BUDGET
 
 .. autocfunction:: xdp_sock.c::xdp_sock_get_fd
 

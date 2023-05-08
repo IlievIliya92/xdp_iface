@@ -38,16 +38,24 @@ extern "C" {
 //  This is a stable class, and may not change except for emergencies. It
 //  is provided in stable builds.
 
-// The xsks map name
+/**
+ *  Default xsks map name
+ */
 #define XDP_SOCK_XSKS_MAP_DEFAULT "xsks_map"
 
-// Prefer busy poll
+/**
+ *  Prefer busy poll sockopt
+ */
 #define XDP_SOCK_SO_PREFER_BUSY_POLL 69
 
-// Busy poll
+/**
+ * Busy poll sockopt
+ */
 #define XDP_SOCK_SO_BUSY_POLL 36
 
-// Busy poll budget
+/**
+ *  Busy poll budget sockopt
+ */
 #define XDP_SOCK_SO_BUSY_POLL_BUDGET 70
 
 //  Create a new xdp socket
