@@ -16,12 +16,11 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Cache VM disk
-        working-directory: ./builds/vm/fedora
         uses: actions/cache@v3.0.5
         id: cache-vm-disk
         with:
-          path: ./f37vm.qcow2
-          key: ${{ runner.os }}-vm-disk-${{ hashFiles('f37vm.qcow2') }}
+          path: ./builds/vm/fedora/f37vm.qcow2
+          key: ${{ runner.os }}-vm-disk-${{ hashFiles('builds/vm/fedora/f37vm.qcow2') }}
 
       - name: Prepare runner
         working-directory: ./builds/vm/fedora
