@@ -42,14 +42,14 @@ def send_frames(xdp_sock):
 
         time.sleep(0.01)
 
-    print(f"--- Batches sent: {batches_to_sent}, frames sent: {farmes_sent}")
+    print(f"--- Frames sent: {farmes_sent}")
     STOP = True
 
 def main():
     batch_size = 30
 
     xdp_log = xdpiface.XdpLog()
-    xdp_log.level_set(xdpiface.XdpLog.TRACE)
+    xdp_log.level_set(xdpiface.XdpLog.INFO)
 
     xdp_iface = xdpiface.XdpIface(xdpiface.XdpIface.DEFAULT.encode())
     xdp_iface.load_program(xdpiface.XdpIface.XDP_PROG_DEFAULT.encode())
@@ -91,8 +91,9 @@ def main():
                     frames_received += frames_recd.value
                     for i in range(frames_recd.value):
                         xdp_sock.recv (i_buffer, i_buffer_size)
-                        print(f"--- Frame length: {i_buffer_size.value}, frames received: {frames_received}")
                     xdp_sock.rx_batch_release(frames_recd.value);
+
+    print(f"--- Frames received: {frames_received}")
 
     thread.join()
     xdp_iface.unload_program()

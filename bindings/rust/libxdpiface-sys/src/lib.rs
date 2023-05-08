@@ -17,7 +17,7 @@ mod tests {
     fn xdp_iface_constructor_destructor() {
         unsafe {
             const batch_size: u32 = 30;
-            xdp_log_level_set(XDP_LOG_TRACE as i32);
+            xdp_log_level_set(XDP_LOG_INFO as i32);
 
             let mut xdp_iface: *mut xdp_iface_t = xdp_iface_new(XDP_IFACE_DEFAULT.as_ptr() as *const i8);
             xdp_iface_load_program(xdp_iface, XDP_IFACE_XDP_PROG_DEFAULT.as_ptr() as *const i8);
@@ -40,6 +40,7 @@ mod tests {
                 xdp_sock_send(xdp_sock, o_buffer, o_buffer_size as u64);
             }
             xdp_sock_tx_batch_release(xdp_sock, batch_size);
+            println!("--- Frames sent: {}", batch_size);
 
             let mut frames_rcvd: u32 = 0;
             let mut i_buffer_size: u64 = 0;
@@ -50,6 +51,7 @@ mod tests {
                 xdp_sock_recv(xdp_sock, i_buffer, &mut i_buffer_size);
             }
             xdp_sock_rx_batch_release(xdp_sock, frames_rcvd);
+            println!("--- Frames received: {}", frames_rcvd);
 
             dealloc(o_buffer as *mut u8, layout);
             dealloc(i_buffer as *mut u8, layout);

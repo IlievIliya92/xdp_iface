@@ -20,7 +20,7 @@ int main (int argc, char *argv [])
     size_t i_buffer_size = 0;
 
     XdpLog xdp_log;
-    xdp_log.levelSet(XDP_LOG_TRACE);
+    xdp_log.levelSet(XDP_LOG_INFO);
 
     XdpIface xdp_iface(XDP_IFACE_DEFAULT);
     xdp_iface.loadProgram(XDP_IFACE_XDP_PROG_DEFAULT);
@@ -36,6 +36,7 @@ int main (int argc, char *argv [])
     for (int i = 0; i < batch_size; i++)
         xdp_sock.send (o_buffer, o_buffer_size);
     xdp_sock.txBatchRelease(batch_size);
+    std::cout << "--- Frames sent: " << batch_size << std::endl;
 
     xdp_sock.rxBatchGetSize (&frames_rcvd, batch_size);
     for (int i = 0; i < frames_rcvd; i ++)
@@ -43,7 +44,7 @@ int main (int argc, char *argv [])
         xdp_sock.recv (i_buffer, &i_buffer_size);
     }
     xdp_sock.rxBatchRelease(frames_rcvd);
-    std::cout << "Frames received: " << frames_rcvd << std::endl;
+    std::cout << "--- Frames received: " << frames_rcvd << std::endl;
 
     xdp_iface.unloadProgram();
 
