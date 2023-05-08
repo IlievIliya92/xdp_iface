@@ -12,6 +12,19 @@ import (
 	"unsafe"
 )
 
+const XDP_LOG_TRACE int = C.XDP_LOG_TRACE
+const XDP_LOG_DEBUG int = C.XDP_LOG_DEBUG
+const XDP_LOG_INFO int = C.XDP_LOG_INFO
+const XDP_LOG_WARNING int = C.XDP_LOG_WARNING
+const XDP_LOG_ERROR int = C.XDP_LOG_ERROR
+const XDP_LOG_CRITICAL int = C.XDP_LOG_CRITICAL
+const XDP_LOG_LVLS int = C.XDP_LOG_LVLS
+
+func XdpLogLevelSet (level int)  {
+	levelCint := C.int(level)
+	C.xdp_log_level_set(levelCint)
+}
+
 const XDP_IFACE_DEFAULT string  = C.XDP_IFACE_DEFAULT
 const XDP_IFACE_XDP_PROG_DEFAULT string  = C.XDP_IFACE_XDP_PROG_DEFAULT
 

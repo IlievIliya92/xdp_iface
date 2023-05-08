@@ -2,9 +2,7 @@ package xdpiface
 
 import (
 	"testing"
-	"encoding/hex"
 	"bytes"
-	"fmt"
 )
 
 func TestXdpIface(t *testing.T) {
@@ -24,6 +22,8 @@ func TestXdpSock(t *testing.T) {
 
 	var iBufferSize int = 0
 	iBuffer := make([]byte, 9000)
+
+	XdpLogLevelSet(XDP_LOG_TRACE)
 
 	xdp_iface, err := XdpIfaceNew(XDP_IFACE_DEFAULT)
 	if err != nil {
@@ -53,7 +53,6 @@ func TestXdpSock(t *testing.T) {
     xdp_sock.RxBatchGetSize (&frames_rcvd, batch_size);
 	for i := 1; i <= int(frames_rcvd); i ++ {
         xdp_sock.Recv (iBuffer, &iBufferSize)
-		fmt.Println(hex.Dump(iBuffer[:iBufferSize]))
     }
     xdp_sock.RxBatchRelease(frames_rcvd)
 

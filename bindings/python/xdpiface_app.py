@@ -18,7 +18,7 @@ def send_frames(xdp_sock):
     global STOP
     frame_size = 1500
     batch_size = 30
-    batches_to_send = 100
+    batches_to_send = 10
     batches_to_sent = 0
     farmes_sent = 0
 
@@ -47,6 +47,9 @@ def send_frames(xdp_sock):
 
 def main():
     batch_size = 30
+
+    xdp_log = xdpiface.XdpLog()
+    xdp_log.level_set(xdpiface.XdpLog.TRACE)
 
     xdp_iface = xdpiface.XdpIface(xdpiface.XdpIface.DEFAULT.encode())
     xdp_iface.load_program(xdpiface.XdpIface.XDP_PROG_DEFAULT.encode())
@@ -89,39 +92,10 @@ def main():
                     for i in range(frames_recd.value):
                         xdp_sock.recv (i_buffer, i_buffer_size)
                         print(f"--- Frame length: {i_buffer_size.value}, frames received: {frames_received}")
-                        # print(hexdump(i_buffer.raw[:i_buffer_size.value]))
                     xdp_sock.rx_batch_release(frames_recd.value);
 
     thread.join()
     xdp_iface.unload_program()
-
-class hexdump:
-    def __init__(self, buf, off=0):
-        self.buf = buf
-        self.off = off
-
-    def __iter__(self):
-        last_bs, last_line = None, None
-        for i in range(0, len(self.buf), 16):
-            bs = bytearray(self.buf[i : i + 16])
-            line = "{:08x}  {:23}  {:23}  |{:16}|".format(
-                self.off + i,
-                " ".join(("{:02x}".format(x) for x in bs[:8])),
-                " ".join(("{:02x}".format(x) for x in bs[8:])),
-                "".join((chr(x) if 32 <= x < 127 else "." for x in bs)),
-            )
-            if bs == last_bs:
-                line = "*"
-            if bs != last_bs or line != last_line:
-                yield line
-            last_bs, last_line = bs, line
-        yield "{:08x}".format(self.off + len(self.buf))
-
-    def __str__(self):
-        return "\n".join(self)
-
-    def __repr__(self):
-        return "\n".join(self)
 
 if __name__ == '__main__':
     main()

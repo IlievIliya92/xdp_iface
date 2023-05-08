@@ -8,6 +8,7 @@ class XdpSock;
 
 #include "xdp_iface.hpp"
 #include "xdp_sock.hpp"
+#include "xdp_log.hpp"
 
 
 #endif /* __XDPIFACE_CPP_H__ */

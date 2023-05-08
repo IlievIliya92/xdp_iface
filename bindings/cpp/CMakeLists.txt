@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 project(xdpifacecpp VERSION 1.1.0 DESCRIPTION "XDP Iface CPP bindings")
 
 include(GNUInstallDirs)
-set(SRC_FILES src/xdp_iface.cpp src/xdp_sock.cpp)
+set(SRC_FILES src/xdp_iface.cpp src/xdp_sock.cpp src/xdp_log.cpp)
 add_library(xdpifacecpp SHARED ${SRC_FILES})
 target_link_libraries(xdpifacecpp PUBLIC xdpiface)
 

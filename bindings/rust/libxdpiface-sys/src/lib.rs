@@ -12,12 +12,12 @@ mod tests {
     use std::ptr;
     use std::slice;
     use std::convert::TryInto;
-    use hexdump::hexdump;
 
     #[test]
     fn xdp_iface_constructor_destructor() {
         unsafe {
             const batch_size: u32 = 30;
+            xdp_log_level_set(XDP_LOG_TRACE as i32);
 
             let mut xdp_iface: *mut xdp_iface_t = xdp_iface_new(XDP_IFACE_DEFAULT.as_ptr() as *const i8);
             xdp_iface_load_program(xdp_iface, XDP_IFACE_XDP_PROG_DEFAULT.as_ptr() as *const i8);
@@ -48,7 +48,6 @@ mod tests {
             xdp_sock_rx_batch_get_size(xdp_sock, &mut frames_rcvd, batch_size);
             for _ in 0..frames_rcvd {
                 xdp_sock_recv(xdp_sock, i_buffer, &mut i_buffer_size);
-                hexdump(slice::from_raw_parts(i_buffer as *const u8, i_buffer_size as usize));
             }
             xdp_sock_rx_batch_release(xdp_sock, frames_rcvd);
 

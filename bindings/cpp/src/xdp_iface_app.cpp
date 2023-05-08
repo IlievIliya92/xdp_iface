@@ -4,24 +4,7 @@
 
 #include "xdp_iface.hpp"
 #include "xdp_sock.hpp"
-
-static void hexdump(void *ptr, int buflen) {
-    unsigned char *buf = (unsigned char*)ptr;
-    int i, j;
-    for (i=0; i<buflen; i+=16) {
-        printf("%06x: ", i);
-        for (j=0; j<16; j++)
-            if (i+j < buflen)
-                printf("%02x ", buf[i+j]);
-            else
-                printf("   ");
-        printf(" ");
-        for (j=0; j<16; j++)
-            if (i+j < buflen)
-                printf("%c", isprint(buf[i+j]) ? buf[i+j] : '.');
-        printf("\n");
-    }
-}
+#include "xdp_log.hpp"
 
 int main (int argc, char *argv [])
 {
@@ -35,6 +18,9 @@ int main (int argc, char *argv [])
 
     char i_buffer[9000];
     size_t i_buffer_size = 0;
+
+    XdpLog xdp_log;
+    xdp_log.levelSet(XDP_LOG_TRACE);
 
     XdpIface xdp_iface(XDP_IFACE_DEFAULT);
     xdp_iface.loadProgram(XDP_IFACE_XDP_PROG_DEFAULT);
@@ -55,7 +41,6 @@ int main (int argc, char *argv [])
     for (int i = 0; i < frames_rcvd; i ++)
     {
         xdp_sock.recv (i_buffer, &i_buffer_size);
-        hexdump(i_buffer, i_buffer_size);
     }
     xdp_sock.rxBatchRelease(frames_rcvd);
     std::cout << "Frames received: " << frames_rcvd << std::endl;
