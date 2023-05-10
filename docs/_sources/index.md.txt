@@ -4,6 +4,8 @@ hide-toc: true
 
 # XDP Interface
 
+[![Fedora Test Build](https://github.com/IlievIliya92/xdp_iface/actions/workflows/fedora_test_build_install.yml/badge.svg)](https://github.com/IlievIliya92/xdp_iface/actions/workflows/fedora_test_build_install.yml)
+
 The purpouse of this documentation is to provide guidance on how to install and use
 the xdpiface shared library.
 
