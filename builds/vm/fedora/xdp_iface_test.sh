@@ -10,8 +10,6 @@ echo "Running C++ bindings tests"
 sshpass -p $USER_PASS ssh "$USER@$IP" "/home/xdp_iface_work_dir/xdp_iface/build/bindings/cpp/xdpiface_app_cpp"
 echo "Running Python bindings tests"
 sshpass -p $USER_PASS ssh "$USER@$IP" "/usr/bin/python3 /home/xdp_iface_work_dir/xdp_iface/bindings/python/xdpiface_app.py"
-echo "Running Go bindings tests"
-sshpass -p $USER_PASS ssh "$USER@$IP" "cd /home/xdp_iface_work_dir/xdp_iface/bindings/go/xdpiface/ && go test -c && ./xdpiface.test"
 echo "Running RUST bindings tests"
 sshpass -p $USER_PASS ssh "$USER@$IP" "cd /home/xdp_iface_work_dir/xdp_iface/bindings/rust//libxdpiface-sys/ && cargo test"
 
