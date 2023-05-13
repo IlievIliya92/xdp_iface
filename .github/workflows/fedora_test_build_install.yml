@@ -39,11 +39,6 @@ jobs:
         working-directory: ./builds/vm/fedora
         run: sudo ./install_vm.sh
 
-      - name: Deploy XDP iface repo & dependencies
-        working-directory: ./builds/vm/fedora
-        run: sudo ./xdp_iface_set_up_vm.sh
-        continue-on-error: true
-
       - name: Execute XDP iface selftest
         working-directory: ./builds/vm/fedora
         run: ./xdp_iface_test.sh
