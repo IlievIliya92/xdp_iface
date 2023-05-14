@@ -35,6 +35,7 @@
 /******************************** INCLUDE FILES *******************************/
 #include <errno.h>
 #include <unistd.h>
+#include <sched.h>
 #include <sys/mman.h>
 #include <sys/socket.h>
 #include <linux/if_link.h>
@@ -52,7 +53,7 @@
 #define XDP_IFACE_XSK_FRAMES              (4 * 4096)
 #define XDP_IFACE_XSK_FRAMESIZE           (XSK_UMEM__DEFAULT_FRAME_SIZE)
 
-
+#define XDP_SCHED_PRI__DEFAULT  0
 /********************************* TYPEDEFS ***********************************/
 
 typedef struct _xsk_umem_info_t {
@@ -76,6 +77,9 @@ struct _xdp_sock_t {
 
     xsk_umem_info_t *umem;
     void *bufs;
+
+    /* Schedule priority */
+    int schprio;
 };
 
 /********************************* LOCAL DATA *********************************/
@@ -170,7 +174,11 @@ xdp_sock_t *
 xdp_sock_new (xdp_iface_t *xdp_interface)
 {
     assert(xdp_interface);
+
     struct xsk_socket_config cfg;
+    struct sched_param schparam;
+    /* the standard round-robin time-sharing policy; */
+    static int schpolicy = SCHED_OTHER;
     int ret = 0;
 
     xdp_sock_t *self = (xdp_sock_t *) zmalloc (sizeof (xdp_sock_t));
@@ -209,6 +217,21 @@ xdp_sock_new (xdp_iface_t *xdp_interface)
     self->idx_tx = 0;
     self->pending_frames_tx = 0;
     self->idx_rx = 0;
+    self->schprio = XDP_SCHED_PRI__DEFAULT;
+
+    /**
+     *  Configure sched priority for better wake-up accuracy
+     * https://man7.org/linux/man-pages/man2/sched_setscheduler.2.html
+     */
+    memset(&schparam, 0, sizeof(schparam));
+    schparam.sched_priority = self->schprio;
+    ret = sched_setscheduler(0, schpolicy, &schparam);
+    if (ret) {
+        XDP_LOG_MSG(XDP_LOG_ERROR, "Error(%d) in setting priority(%d): %s\n",
+            errno, self->schprio, strerror(errno));
+        free(self);
+        return NULL;
+    }
 
     return self;
 }
