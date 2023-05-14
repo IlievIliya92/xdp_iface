@@ -101,6 +101,10 @@ extern "C" {
 void
     xdp_log_level_set (int level);
 
+//  Get log level
+int
+    xdp_log_level_get (void);
+
 //  Log message
 void
     xdp_log_msg (const char *module, int line, int level, const char *format, ...);

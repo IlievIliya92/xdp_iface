@@ -292,6 +292,8 @@ class XdpSock(object):
 # xdp_log
 lib.xdp_log_level_set.restype = None
 lib.xdp_log_level_set.argtypes = [c_int]
+lib.xdp_log_level_get.restype = c_int
+lib.xdp_log_level_get.argtypes = []
 lib.xdp_log_msg.restype = None
 lib.xdp_log_msg.argtypes = [c_char_p, c_int, c_int, c_char_p]
 lib.xdp_log_hexdump.restype = None
@@ -338,6 +340,13 @@ class XdpLog(object):
         Set log level
         """
         return lib.xdp_log_level_set(level)
+
+    @staticmethod
+    def level_get():
+        """
+        Get log level
+        """
+        return lib.xdp_log_level_get()
 
     @staticmethod
     def msg(module, line, level, format, *args):

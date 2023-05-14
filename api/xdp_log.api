@@ -15,6 +15,11 @@
         <return type = "nothing" />
     </method>
 
+    <method name = "level_get" singleton = "1" >
+        Get log level
+        <return type = "integer" />
+    </method>
+
     <method name = "msg" singleton = "1" >
         Log message
         <argument name = "module" type = "string" />
